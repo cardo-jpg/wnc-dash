@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshop Nova Carreira · Lançamento Hire Brazil</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap');
+  :root{
+    --bg:#0b0a0f; --panel:#141019; --panel-2:#17131f; --surface:#17131f; --raise:#1d1828;
+    --border:#272030; --border-soft:#201a29; --line:#241e2f;
+    --text:#f3f1f7; --muted:#9a93a8; --faint:#6c6579;
+    --accent:#a78bdf; --accent-2:#8463cf; --accent-deep:#5a3f93;
+    --accent-soft:rgba(167,139,223,.12); --accent-line:rgba(167,139,223,.28);
+    --good:#5fd6a3; --good-soft:rgba(95,214,163,.12);
+    --warn:#e3b65f; --warn-soft:rgba(227,182,95,.12);
+    --bad:#e87c84; --bad-soft:rgba(232,124,132,.12);
+    --mono:'Space Grotesk',ui-monospace,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    --disp:'Space Grotesk',var(--sans);
+    --tnum:"tnum" 1,"lnum" 1;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; color:var(--text); min-height:100vh; font-family:var(--sans); -webkit-font-smoothing:antialiased; font-size:14px;
+    background:
+      radial-gradient(1200px 520px at 82% -12%, rgba(132,99,207,.14), transparent 60%),
+      radial-gradient(900px 480px at 0% 0%, rgba(90,63,147,.10), transparent 55%),
+      var(--bg);
+    background-attachment:fixed; }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:var(--tnum); }
+  .page{ max-width:1380px; margin:0 auto; padding:26px 22px 70px; }
+
+  /* Header */
+  .top{ display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px 20px; margin-bottom:22px; }
+  .brand{ display:flex; flex-direction:column; gap:3px; }
+  .brand-k{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{ width:12px; height:12px; border-radius:3px; background:linear-gradient(145deg,var(--accent),var(--accent-deep)); box-shadow:0 0 0 4px var(--accent-soft); }
+  .brand-name{ font-family:var(--disp); font-size:1.42rem; font-weight:700; letter-spacing:-.015em; line-height:1; }
+  .brand-sub{ font-size:.76rem; color:var(--muted); letter-spacing:.02em; margin-left:22px; }
+  .top-r{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .live{ display:inline-flex; align-items:center; gap:7px; font-size:.68rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); padding:6px 12px; border-radius:8px; }
+  .live::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:pulse 1.8s infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+  .presets{ display:flex; background:var(--surface); border:1px solid var(--border); border-radius:9px; overflow:hidden; }
+  .preset{ padding:7px 13px; font-size:.78rem; font-weight:500; cursor:pointer; color:var(--muted); border:none; background:none; font-family:inherit; transition:.14s; }
+  .preset:hover{ color:var(--text); }
+  .preset.active{ background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 -2px 0 var(--accent); }
+  .dates{ display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:4px 9px; }
+  .dlbl{ font-size:.7rem; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; }
+  .dates input[type=date]{ background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:inherit; font-size:.76rem; padding:4px 6px; color-scheme:dark; cursor:pointer; }
+  .dates input[type=date]:focus{ outline:none; border-color:var(--accent); }
+  .dclear{ background:none; border:none; color:var(--faint); cursor:pointer; font-size:.72rem; font-weight:600; padding:2px 5px; font-family:inherit; letter-spacing:.03em; }
+  .dclear:hover{ color:var(--text); }
+  .updated{ font-size:.72rem; color:var(--faint); }
+  .btn{ background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:7px 14px; font-size:.78rem; font-weight:500; cursor:pointer; font-family:inherit; transition:.14s; }
+  .btn:hover{ border-color:var(--accent-line); background:var(--raise); }
+
+  /* Tabs */
+  .tabs{ display:flex; flex-wrap:wrap; gap:4px; border-bottom:1px solid var(--border); margin-bottom:26px; padding-bottom:0; }
+  .tab{ padding:10px 18px; font-size:.86rem; font-weight:550; cursor:pointer; color:var(--muted); border:none; background:none; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1px; transition:.14s; }
+  .tab:hover{ color:var(--text); }
+  .tab.active{ color:var(--text); border-bottom-color:var(--accent); }
+
+  /* Section label */
+  .lbl{ display:flex; align-items:center; gap:9px; font-size:.75rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:34px 0 15px; }
+  .lbl::before{ content:''; width:3px; height:13px; border-radius:2px; background:var(--accent); opacity:.85; }
+
+  /* Gauges */
+  .gauges{ display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:14px; margin-bottom:12px; }
+  .gauge-card{ background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px 20px 18px; display:flex; flex-direction:column; align-items:center; transition:border-color .15s; }
+  .gauge-card:hover{ border-color:var(--accent-line); }
+  .gauge-title{ font-size:.74rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+  .gauge-sub{ font-size:.68rem; color:var(--accent); margin-bottom:4px; letter-spacing:.02em; }
+  .gauge-wrap{ position:relative; width:100%; max-width:208px; aspect-ratio:200/140; }
+  .gauge-svg{ width:100%; height:100%; overflow:visible; }
+  .gauge-track{ fill:none; stroke:#ffffff10; stroke-width:12; stroke-linecap:round; }
+  .gauge-fill{ fill:none; stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset .6s ease; }
+  .gauge-pct{ position:absolute; left:0; right:0; top:54%; transform:translateY(-50%); text-align:center; font-family:var(--disp); font-size:2.3rem; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .gauge-leg{ font-size:11px; font-weight:600; font-family:var(--disp); }
+  .gauge-stats{ display:flex; gap:20px; margin-top:6px; }
+  .gauge-stat{ text-align:center; }
+  .gauge-stat-l{ font-size:.66rem; color:var(--faint); text-transform:uppercase; letter-spacing:.06em; }
+  .gauge-stat-v{ font-family:var(--disp); font-size:1.18rem; font-weight:600; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .gauge-stat-v.pc-ok{ color:var(--good); }
+  .gauge-stat-v.pc-bad{ color:var(--bad); }
+
+  /* Cards */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:13px; }
+  .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:17px 19px; min-height:118px; display:flex; flex-direction:column; justify-content:center; transition:transform .14s, border-color .14s; }
+  .card:hover{ transform:translateY(-2px); border-color:var(--accent-line); }
+  .card.hl{ background:linear-gradient(160deg, rgba(132,99,207,.16), var(--panel) 72%); border-color:var(--accent-line); }
+  .card .k{ font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
+  .card.hl .k{ color:var(--accent); }
+  .card .prev{ font-size:.72rem; color:var(--faint); margin-top:3px; }
+  .card .v{ font-family:var(--disp); font-size:1.78rem; font-weight:600; margin-top:11px; line-height:1.02; white-space:nowrap; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  .card .v.accent{ color:var(--accent); } .card .v.good{ color:var(--good); }
+  .card .tax{ font-size:.72rem; color:var(--muted); margin-top:7px; }
+
+  /* Charts */
+  .charts2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .charts3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media(max-width:1000px){ .charts3{ grid-template-columns:1fr; } }
+  @media(max-width:900px){ .charts2{ grid-template-columns:1fr; } .gauges{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:560px){ .gauges{ grid-template-columns:1fr; } }
+  .chart-card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .chart-title{ font-size:.74rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px; }
+  .chart-box{ position:relative; }
+  .chart-box.tall{ height:300px; }
+
+  /* Tables */
+  .twrap{ overflow-x:auto; border:1px solid var(--border); border-radius:13px; background:var(--panel); }
+  table{ width:100%; border-collapse:collapse; font-size:.86rem; }
+  th,td{ padding:13px 15px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums; }
+  td{ color:var(--text); }
+  th{ color:var(--faint); font-weight:600; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; background:var(--raise); position:sticky; top:0; z-index:2; }
+  td:first-child,th:first-child{ text-align:left; max-width:330px; white-space:normal; font-variant-numeric:normal; }
+  td:first-child{ color:var(--text); font-weight:500; }
+  tbody tr:hover td{ background:var(--accent-soft); }
+  tr:last-child td{ border-bottom:none; }
+  .vlink{ color:var(--accent); text-decoration:none; font-size:.76rem; font-weight:500; }
+  .vlink:hover{ text-decoration:underline; }
+  .fbar{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 0 14px; }
+  .w3filter{ width:100%; max-width:320px; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:9px; color:var(--text); font-family:inherit; font-size:.84rem; }
+  .w3filter:focus{ outline:none; border-color:var(--accent); }
+  .w3filter::placeholder{ color:var(--faint); }
+  .stbtns{ display:inline-flex; gap:5px; }
+  .stbtn{ padding:9px 15px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-family:inherit; font-size:.78rem; font-weight:550; cursor:pointer; white-space:nowrap; transition:.14s; }
+  .stbtn:hover{ color:var(--text); border-color:var(--accent-line); }
+  .stbtn.active{ background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent); }
+  th.sortable{ cursor:pointer; user-select:none; transition:color .12s; }
+  th.sortable:hover{ color:var(--accent); }
+
+  /* Badges */
+  .al{ display:inline-block; font-size:.7rem; font-weight:600; padding:4px 10px; border-radius:7px; white-space:nowrap; letter-spacing:.01em; }
+  .al-ok{ color:var(--good); background:var(--good-soft); border:1px solid rgba(95,214,163,.3); }
+  .al-alto{ color:var(--warn); background:var(--warn-soft); border:1px solid rgba(227,182,95,.3); }
+  .al-crit{ color:var(--bad); background:var(--bad-soft); border:1px solid rgba(232,124,132,.32); }
+  .al-sem{ color:var(--faint); background:rgba(120,110,140,.1); border:1px solid var(--border); }
+  .tp{ display:inline-block; font-size:.7rem; font-weight:600; padding:3px 10px; border-radius:7px; white-space:nowrap; }
+  .tp-q{ color:var(--warn); background:var(--warn-soft); border:1px solid rgba(227,182,95,.3); }
+  .tp-f{ color:#8fb8e8; background:rgba(120,160,230,.1); border:1px solid rgba(120,160,230,.3); }
+  .tp-n{ color:var(--faint); }
+  .st{ display:inline-block; font-size:.7rem; font-weight:600; padding:3px 10px; border-radius:7px; white-space:nowrap; }
+  .st-on{ color:var(--good); background:var(--good-soft); border:1px solid rgba(95,214,163,.32); }
+  .st-off{ color:var(--faint); background:rgba(120,110,140,.1); border:1px solid var(--border); }
+  .st-bad{ color:var(--bad); background:var(--bad-soft); border:1px solid rgba(232,124,132,.32); }
+  .st-none{ color:var(--faint); }
+  .st.stclk{ cursor:pointer; user-select:none; transition:filter .12s, box-shadow .12s; }
+  .st.stclk:hover{ filter:brightness(1.15); box-shadow:0 0 0 1px var(--accent-line); }
+  .st.st-man{ box-shadow:0 0 0 1px var(--accent-line) inset; }
+  .st .stov{ font-size:.9em; opacity:.8; margin-left:2px; }
+  .lp-win{ color:var(--good); font-weight:700; }
+
+  /* Vendas group selector */
+  .vgsel{ display:flex; gap:7px; margin:2px 0 14px; flex-wrap:wrap; }
+  .vgbtn{ font-size:.74rem; font-weight:550; padding:7px 16px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--muted); cursor:pointer; transition:.14s; font-family:inherit; }
+  .vgbtn:hover{ color:var(--text); border-color:var(--accent-line); }
+  .vgbtn.active{ background:var(--accent-soft); color:var(--accent); border-color:var(--accent-line); }
+
+  /* LP */
+  .lp-grid{ display:flex; flex-direction:column; gap:20px; }
+  .lp-geral{ background:linear-gradient(150deg, rgba(132,99,207,.16), var(--panel) 70%); border:1px solid var(--accent-line); border-radius:16px; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:22px; }
+  .lp-geral-lbl{ font-family:var(--disp); font-size:.98rem; font-weight:600; letter-spacing:.01em; }
+  .lp-geral-stats{ display:flex; gap:32px; flex-wrap:wrap; }
+  .lp-panel{ background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px 22px; }
+  .lp-header{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+  .lp-header-name{ font-family:var(--disp); font-size:1.08rem; font-weight:600; }
+  .lp-header-url{ display:block; font-size:.74rem; color:var(--accent); text-decoration:none; opacity:.72; margin-top:4px; }
+  .lp-header-url:hover{ opacity:1; }
+  .lp-header-right{ display:flex; gap:26px; flex-wrap:wrap; }
+  .lp-meta-lbl{ font-size:.62rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); }
+  .lp-meta-val{ font-family:var(--disp); font-size:1.32rem; font-weight:600; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .lp-meta-val.accent{ color:var(--accent); }
+  .lp-body{ display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+  @media(max-width:900px){ .lp-body{ grid-template-columns:1fr; } }
+  .fn{ display:flex; flex-direction:column; gap:5px; }
+  .fn-seg{ height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .fn-lbl{ font-size:.64rem; font-weight:600; letter-spacing:.07em; color:rgba(255,255,255,.82); }
+  .fn-val{ font-family:var(--disp); font-size:1.42rem; font-weight:600; color:#fff; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .fn-rate{ text-align:center; margin:1px 0; }
+  .fn-pill{ display:inline-block; font-size:.68rem; font-weight:600; color:var(--accent); background:var(--surface); border:1px solid var(--accent-line); padding:4px 13px; border-radius:20px; }
+  .lp-charts-col{ display:flex; flex-direction:column; gap:12px; }
+  .lp-chart-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:11px; padding:13px 15px; }
+  .lp-chart-title{ font-size:.64rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--faint); margin-bottom:9px; }
+  .lp-chart-h{ height:116px; }
+
+  /* Pesquisa */
+  .pk-strip{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:13px; margin:14px 0 24px; }
+  @media(max-width:1000px){ .pk-strip{ grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:600px){ .pk-strip{ grid-template-columns:repeat(2,1fr); } }
+  .pk{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:19px 21px; }
+  .pk-l{ font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600; }
+  .pk-v{ font-family:var(--disp); font-size:2.25rem; font-weight:600; color:var(--accent); margin-top:7px; line-height:1; font-variant-numeric:tabular-nums; }
+  .pk-n{ font-size:.74rem; color:var(--faint); margin-top:6px; }
+  .pq-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:16px; }
+  .pq-card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
+  .pq-card h4{ font-family:var(--disp); font-size:.94rem; font-weight:600; color:var(--text); margin:0 0 14px; }
+  .pq-card .pq-cw{ position:relative; height:300px; }
+  .pq-card.pq-wide{ grid-column:1 / -1; }
+  .pq-card.pq-wide .pq-cw{ height:400px; }
+  .pq-card .wc{ display:flex; flex-wrap:wrap; align-items:center; align-content:center; justify-content:center; gap:4px 18px; padding:22px 16px; min-height:230px; line-height:1.05; }
+  .wcw{ font-weight:700; letter-spacing:-.01em; cursor:default; transition:transform .12s; white-space:nowrap; font-family:var(--disp); }
+  .wcw:hover{ transform:scale(1.08); }
+
+  .empty,.loading{ text-align:center; color:var(--muted); padding:40px; }
+  .err{ color:var(--bad); }
+  .note{ font-size:.78rem; color:var(--faint); padding:18px; border:1px dashed var(--border); border-radius:12px; text-align:center; background:var(--surface); }
+  .foot{ margin-top:30px; font-size:.7rem; color:var(--faint); text-align:center; line-height:1.6; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="top">
+      <div class="brand">
+        <div class="brand-k"><span class="brand-mark"></span><span class="brand-name">Workshop Nova Carreira</span></div>
+        <div class="brand-sub">Lançamento · Hire Brazil · Malu</div>
+      </div>
+      <div class="top-r">
+        <span class="live">Ao vivo</span>
+        <div class="presets" id="presets">
+          <button class="preset" data-d="1" onclick="setPreset(this)">Ontem</button>
+          <button class="preset" data-d="3" onclick="setPreset(this)">3 dias</button>
+          <button class="preset" data-d="7" onclick="setPreset(this)">7 dias</button>
+          <button class="preset" data-d="14" onclick="setPreset(this)">14 dias</button>
+          <button class="preset active" data-d="all" onclick="setPreset(this)">Tudo</button>
+        </div>
+        <div class="dates">
+          <span class="dlbl">De</span><input type="date" id="dDe" onchange="setDates()">
+          <span class="dlbl">até</span><input type="date" id="dAte" onchange="setDates()">
+          <button class="dclear" id="dClear" onclick="clearDates()" style="display:none">Limpar</button>
+        </div>
+        <button class="btn" onclick="loadAll()">Atualizar</button>
+        <div class="updated" id="updated"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-p="geral" onclick="setTab(this)">Geral</button>
+      <button class="tab" data-p="malu" onclick="setTab(this)">Malu</button>
+      <button class="tab" data-p="hire" onclick="setTab(this)">Hire</button>
+      <button class="tab" data-p="campanhas" onclick="setTab(this)">Campanhas</button>
+      <button class="tab" data-p="publicos" onclick="setTab(this)">Públicos</button>
+      <button class="tab" data-p="criativos" onclick="setTab(this)">Criativos</button>
+      <button class="tab" data-p="lp" onclick="setTab(this)">LP</button>
+      <button class="tab" data-p="pesquisa" onclick="setTab(this)">Pesquisa</button>
+      <button class="tab" data-p="vendas" onclick="setTab(this)">Vendas</button>
+      <button class="tab" data-p="whats" onclick="setTab(this)">Whats</button>
+    </div>
+
+    <div id="body"><div class="loading">Carregando dados da planilha…</div></div>
+    <div class="foot" id="foot">Atualiza automaticamente a cada abertura · dados de 23/10 em diante, incluindo o dia em andamento · vendas vêm da planilha MÉTRICAS</div>
+  </div>
+
+  <script>
+    // ── Config ───────────────────────────────────────────────────────────────
+    const FONTE      = '1vLkRQZNB9Fvsa5aDD1_gZ_QyZdp0pbZ9u26vuvRXpOI';  // dados da Maria: Malu Meta / Hire Meta / Vendas / Metas
+    const ADS_WB     = '1dmmrOYX5S74gM-G_tGzK54EoebiFVaSfaFMZ_09Z4LI';  // workbook operacional (aba MÉTRICAS = verdade das vendas)
+    const GID_METRICAS = '942932531';   // aba MÉTRICAS dentro de ADS_WB
+    const UTM_MALU   = '';   // planilha de UTMs por lead (Malu) — a definir no novo lançamento
+    const UTM_HIRE   = '';   // planilha de UTMs por lead (Hire) — a definir no novo lançamento
+    const SHEET_PESQUISA_ID = '1kQYVgEw6G1aHse-LVZzpIA3XT7UHDJEuKvLNJ01c880';  // credenciamento (confirmar se é a mesma do WNC)
+    const START = new Date(2026, 9, 23);          // 23/10/2026 — início do acompanhamento
+    const FLOOR = new Date(2026, 0, 1);
+    const EVENT = new Date(2026, 10, 21);         // 21/11/2026 — workshop (p/ meta/dia e pacing)
+    const METAS_DEFAULT = { leads:2000, investimento:132000, cpa:80, cpm:25, ctr:0.80, connect_rate:82,
+      cotacao:5.20, data_inicio:'23/10/2026', data_evento:'21 e 22/11' };
+
+    let DATA = { malu:[], hire:[], umalu:[], uhire:[], metas:{...METAS_DEFAULT}, metricas:null, vendas:[] };
+    let profile = 'geral', presetDays = 'all';
+
+    const BRL = v => (v==null||isNaN(v)) ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const BRLk= v => (v==null||isNaN(v)) ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR',{maximumFractionDigits:0});
+    const NUM = v => (v==null||isNaN(v)) ? '—' : Number(v).toLocaleString('pt-BR',{maximumFractionDigits:0});
+    const PCT = v => (v==null||isNaN(v)) ? '—' : Number(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%';
+    const RS  = v => (v==null||isNaN(v)) ? '—' : Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + 'x';
+    const div = (a,b) => b ? a/b : 0;
+    const dkey = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+    function parseBR(s){
+      if(s==null) return 0; if(typeof s==='number') return s;
+      s=String(s).replace(/R\$/g,'').replace(/%/g,'').replace(/ /g,'').trim();
+      if(!s) return 0; s=s.replace(/\./g,'').replace(',','.');
+      const n=parseFloat(s); return isNaN(n)?0:n;
+    }
+
+    // ── gviz JSONP ────────────────────────────────────────────────────────────
+    let _seq=0;
+    function gviz(sheetId, query){
+      return new Promise((resolve,reject)=>{
+        const cb='__gv_'+(++_seq)+'_'+Date.now();
+        const s=document.createElement('script');
+        const done=()=>{ try{delete window[cb];}catch(e){} if(s.parentNode)s.parentNode.removeChild(s); clearTimeout(tm); };
+        const tm=setTimeout(()=>{done();reject(new Error('timeout'));},25000);
+        window[cb]=r=>{ done(); (r&&r.table)?resolve(r.table):reject(new Error('vazio')); };
+        s.onerror=()=>{done();reject(new Error('rede'));};
+        s.src='https://docs.google.com/spreadsheets/d/'+sheetId+'/gviz/tq?'+query+'&tqx=responseHandler:'+cb;
+        document.head.appendChild(s);
+      });
+    }
+    const cNum = c => !c ? 0 : (typeof c.v==='number' ? c.v : parseBR(c.f!=null?c.f:c.v));
+    const cStr = c => !c ? '' : (c.f!=null?c.f:(c.v!=null?String(c.v):''));
+    const cDate= c => {
+      if(!c) return null;
+      const f=String(c.f||c.v||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+      if(f){ let y=+f[3]; if(y<100)y+=2000; return new Date(y,+f[2]-1,+f[1]); }
+      const d=String(c.v||'').match(/Date\((\d+),(\d+),(\d+)/); if(d) return new Date(+d[1],+d[2],+d[3]);
+      return null;
+    };
+
+    // Frente da campanha (verba separada por objetivo): lembrete e mentoria têm meta
+    // própria e NÃO entram nos KPIs do lançamento de ingresso. Default = ingresso.
+    function bucketOf(camp){
+      const U=(camp||'').toUpperCase();
+      if(U.includes('LEMBRETE')) return 'lembrete';
+      if(U.includes('WHATSAPP')) return 'whats';       // WhatsApp_Mentoria vai pro card proprio
+      if(U.includes('MENTORIA')) return 'mentoria';
+      if(U.includes('VISITA'))   return 'visitas';
+      return 'ingresso';
+    }
+    function metaRows(table){
+      const out=[];
+      for(const r of (table.rows||[])){
+        const c=r.c||[]; const d=cDate(c[0]); if(!d||d<START) continue;
+        out.push({ date:d, campanha:cStr(c[1]), adset:cStr(c[2]), cost:cNum(c[3]), impressions:cNum(c[4]), reach:cNum(c[5]),
+          clicks:cNum(c[6]), pageview:cNum(c[7]), ic:cNum(c[8]), compras:cNum(c[9]),
+          link:cStr(c[10]), anuncio:cStr(c[11]), faturamento:cNum(c[12]), status:cStr(c[13]), bucket:bucketOf(cStr(c[1])) });
+      }
+      return out;
+    }
+    function utmRows(table){
+      // Date, Email, utm_source, utm_campaign, utm_medium, utm_content, utm_term
+      const out=[];
+      for(const r of (table.rows||[])){
+        const c=r.c||[]; const d=cDate(c[0]); if(!d||d<START) continue;
+        out.push({ date:d, source:cStr(c[2])||'—', campaign:cStr(c[3])||'—',
+          content:cStr(c[5])||'—', term:cStr(c[6])||'—' });
+      }
+      return out;
+    }
+    // aba "Vendas" (Mentoria Malu): Data, Campanha, Publico, Criativo, Investimento,
+    // Impressões, Cliques, Visitas no Site, Add. Carrinho, Valor Carrinho, Checkout, Vendas, Faturamento, Link
+    function vendaRows(table){
+      const out=[];
+      for(const r of (table.rows||[])){
+        const c=r.c||[]; const d=cDate(c[0]); if(!d) continue;
+        out.push({ date:d, campanha:cStr(c[1])||'—', publico:cStr(c[2])||'—', criativo:cStr(c[3])||'—',
+          inv:cNum(c[4]), imp:cNum(c[5]), clk:cNum(c[6]), vis:cNum(c[7]), cart:cNum(c[8]),
+          valcart:cNum(c[9]), chk:cNum(c[10]), vendas:cNum(c[11]), fat:cNum(c[12]), link:cStr(c[13]) });
+      }
+      return out;
+    }
+    function readMetas(table){
+      const rows=[];
+      if(table.cols&&table.cols.length) rows.push(table.cols.map(c=>c.label!=null?c.label:(c.id||'')));
+      for(const r of (table.rows||[])) rows.push((r.c||[]).map(c=>c?(c.f!=null?c.f:(c.v!=null?String(c.v):'')):''));
+      const m={...METAS_DEFAULT};
+      for(const r of rows){
+        const k=(r[0]||'').toString().trim().toLowerCase(); const v=r[1]!=null?r[1]:'';
+        if(k.includes('leads')){ if(parseBR(v))m.leads=parseBR(v); }
+        else if(k.includes('investimento')){ if(parseBR(v))m.investimento=parseBR(v); if(r[4])m.data_inicio=String(r[4]).trim(); if(r[8])m.data_evento=String(r[8]).trim(); }
+        else if(k==='cpa'){ if(parseBR(v))m.cpa=parseBR(v); }
+        else if(k==='cpm'){ if(parseBR(v))m.cpm=parseBR(v); }
+        else if(k==='ctr'){ if(parseBR(v))m.ctr=parseBR(v); }
+        else if(k.includes('connect')){ if(parseBR(v))m.connect_rate=parseBR(v); }
+        else if(k.includes('cotac')||k.includes('dolar')||k.includes('dólar')||k.includes('cambio')||k.includes('câmbio')||k==='usd'){ if(parseBR(v))m.cotacao=parseBR(v); }
+      }
+      return m;
+    }
+
+    // aba MÉTRICAS: DATA,WA_START,WA_VIP,VENDAS_ORG,PACE_DIA,PACE_MED,FALTA,%META,START_ORG,VIP_ORG,START_ADS,VIP_ADS,TOTAL
+    function metricasParse(table){
+      const rows=table.rows||[]; let latest=null; const series=[]; let dias=0;
+      for(const r of rows){
+        const c=r.c||[]; const d=cDate(c[0]); if(!d) continue;
+        const org=cNum(c[3]), total=cNum(c[12]), has=(org>0||total>0);
+        // Todas as colunas abaixo são ACUMULADAS na planilha — viram valor/dia via
+        // cumDaily(), que é o que deixa o filtro de data funcionar em cima delas.
+        series.push({ date:d, org, paceDia:cNum(c[4]), total,
+          ads:cNum(c[10])+cNum(c[11]), startAds:cNum(c[10]), vipAds:cNum(c[11]),
+          startOrg:cNum(c[8]), vipOrg:cNum(c[9]), waStart:cNum(c[1]), waVip:cNum(c[2]),
+          // Popups de ADS por página (START+VIP) — base pra dividir a venda na LP.
+          // Colunas reais MÉTRICAS: Malu A=18/19, B=20/21, C=22/23 · Hire C=28/29, D=30/31
+          // (26/27 é ORGÂNICO da Hire, não entra). A dobra a A (=0) em B por segurança.
+          // Popups ADS por página (START+VIP). Layout MÉTRICAS novo:
+          // Malu A=17/18, B=19/20, C=21/22 · Hire A=27/28 (14-16 e 25/26 são orgânico).
+          pMaluA:cNum(c[17])+cNum(c[18]), pMaluB:cNum(c[19])+cNum(c[20]), pMaluC:cNum(c[21])+cNum(c[22]),
+          pHireA:cNum(c[27])+cNum(c[28]), hasData:has });
+        if(has){ dias++;
+          latest={ data:d, whatsapp_start:cNum(c[1]), whatsapp_vip:cNum(c[2]),
+            vendas_org:org, pace_diario:cNum(c[4]), pace_medio:cNum(c[5]), falta_meta:cNum(c[6]), pct_meta:parseBR(cStr(c[7])),
+            start_org:cNum(c[8]), vip_org:cNum(c[9]), start_ads:cNum(c[10]), vip_ads:cNum(c[11]), total };
+        }
+      }
+      // "FALTA PARA META" na planilha hoje desconta o TOTAL (org + ads), então a
+      // meta real = falta + total = 1.800, constante em toda a série. (Antes a coluna
+      // era só orgânica e usávamos falta + org; a fórmula da planilha mudou e passou
+      // a incluir o ads — somar só o org fazia a meta encolher p/ 1.800 − ads.)
+      if(latest){ latest.meta = latest.falta_meta + latest.total; latest.dias = dias || 1;
+        latest.vendas_ads = latest.start_ads + latest.vip_ads; }
+      return { latest, series };
+    }
+
+    // ── Vendas ADS: a planilha MÉTRICAS é a fonte de verdade ───────────────────
+    // O Meta sub-reporta compras (pixel/contas novas): hoje reporta ~24 contra 50
+    // na planilha. Então o TOTAL vem da planilha (START ADS + VIP ADS, acumulado)
+    // e as vendas por campanha/criativo/público são redistribuídas proporcional ao
+    // que o Meta reportou, com método do maior resto — inteiros que somam exato.
+
+    // As colunas da planilha são ACUMULADAS. Aqui viram valor por dia (diferença
+    // do acumulado), o que é o que permite o filtro de data funcionar em cima
+    // delas. Ignora linhas futuras vazias — senão o acumulado "cairia" pra zero e
+    // geraria incremento negativo.
+    function cumDaily(key){
+      const s=((DATA.metricas&&DATA.metricas.series)||[]).filter(r=>r.hasData);
+      const out={}; let prev=0;
+      for(const r of s){ const inc=r[key]-prev; prev=r[key]; if(inc>0) out[dkey(r.date)]=inc; }
+      return out;
+    }
+    // Soma os valores diários que caem dentro do filtro de data.
+    function cumInRange(key){
+      const d=cumDaily(key); let t=0;
+      for(const k in d){ const p=k.split('-'); if(inRange(new Date(+p[0],+p[1]-1,+p[2]))) t+=d[k]; }
+      return t;
+    }
+    const adsDaily  = () => cumDaily('ads');     // vendas ads por dia
+    const adsTarget = () => cumInRange('ads');   // vendas ads no período filtrado
+    // Vendas do recorte atual segundo a planilha — ela é quem manda. O Meta só
+    // serve pra RATEAR esse total entre perfis/campanhas/criativos.
+    // null = não há planilha carregada → usa o número do Meta como está.
+    function viewTarget(rows){
+      if(!(DATA.metricas && DATA.metricas.latest)) return null;
+      const t=adsTarget();
+      if(t<=0) return 0;      // planilha diz que não houve venda no período: é 0, não o do Meta
+      let allC=0, allI=0, c=0, i=0;
+      for(const r of DATA.malu.concat(DATA.hire)) if(inRange(r.date)){ allC+=r.compras; allI+=r.cost; }
+      for(const r of rows){ c+=r.compras; i+=r.cost; }
+      // Rateio pelas compras do Meta; se o Meta não reportou nenhuma compra no
+      // período, rateia pelo investido — senão as vendas reais sumiriam da tela.
+      const share = allC>0 ? c/allC : (allI>0 ? i/allI : 0);
+      return Math.round(t*share);
+    }
+    // Distribui `target` entre os grupos proporcional a `raw`, mantendo inteiros
+    // que somam exatamente `target` (maior resto).
+    function distribute(raw, target){
+      const out=raw.map(()=>0);
+      const tot=raw.reduce((a,b)=>a+b,0);
+      if(!(target>0) || tot<=0) return out;
+      const exact=raw.map(v=>v/tot*target);
+      let acc=0; exact.forEach((v,i)=>{ out[i]=Math.floor(v); acc+=out[i]; });
+      const ord=exact.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>b.f-a.f);
+      const rest=target-acc;
+      for(let k=0; k<rest && ord.length; k++) out[ord[k%ord.length].i]++;
+      return out;
+    }
+    // Vendas ajustadas por grupo — somam exatamente o total da planilha do recorte.
+    // Peso: compras do Meta. Se o Meta zerou tudo no período, cai pro investido —
+    // senão a tabela mostraria 0 em toda linha com o total dizendo N.
+    function vendasAdj(raw, rows, peso){
+      const t=viewTarget(rows);
+      if(t==null) return raw;
+      const base = raw.some(v=>v>0) ? raw : ((peso && peso.some(v=>v>0)) ? peso : raw);
+      return distribute(base, t);
+    }
+    // Vendas Ads por dia de um subconjunto de linhas: pega o número real do dia
+    // (planilha) e rateia proporcional às compras que o Meta deu pra esse
+    // subconjunto. Passando todas as linhas, devolve o número da planilha intacto.
+    function adsByDay(rows){
+      const d=adsDaily(), allD={}, subD={}, out={};
+      for(const r of DATA.malu.concat(DATA.hire)) if(inRange(r.date)){ const kd=dkey(r.date); allD[kd]=(allD[kd]||0)+r.compras; }
+      for(const r of rows){ const kd=dkey(r.date); subD[kd]=(subD[kd]||0)+r.compras; }
+      for(const kd in d){ const p=kd.split('-');
+        if(!inRange(new Date(+p[0],+p[1]-1,+p[2]))) continue;
+        const a=allD[kd]||0;
+        out[kd] = a>0 ? Math.round(d[kd]*(subD[kd]||0)/a) : 0;
+      }
+      return out;
+    }
+
+    // ── Filtro de data ─────────────────────────────────────────────────────────
+    // Vale pra dash toda porque TUDO (Meta, UTMs e as colunas da planilha) passa
+    // por inRange. Preset e De/Até são exclusivos: usar um limpa o outro.
+    let fStart=null, fEnd=null;          // null = sem limite daquele lado
+    function cutoff(){
+      if(presetDays==='all') return FLOOR;
+      const t=new Date(); t.setHours(0,0,0,0);
+      const c=new Date(t); c.setDate(c.getDate()-Number(presetDays));
+      return c<FLOOR?FLOOR:c;
+    }
+    // Teto = HOJE (lançamento ao vivo: o José acompanha o dia em andamento). O CPA de
+    // campanha/criativo já mostra "—" quando ainda não há venda lançada na MÉTRICAS,
+    // então o gasto de hoje aparece sem estourar o CPA.
+    function ontem(){ const y=new Date(); y.setHours(0,0,0,0); return y; }
+    const inRange = d => {
+      if(d>ontem()) return false;
+      if(fStart && d<fStart) return false;
+      if(fEnd   && d>fEnd)   return false;
+      return d>=cutoff();
+    };
+
+    // ── Aggregation ─────────────────────────────────────────────────────────────
+    // Connect rate HONESTO: ignora dias com CLIQUE mas ZERO page view — isso é
+    // rastreamento furado (o pixel não registrou a visita; centenas de cliques
+    // com 0 PV é impossível). Sem isso, um dia de tracking quebrado derruba o
+    // connect geral (ex.: 25/07 = 813 cliques / 0 PV puxou o geral de ~80% p/ 52%).
+    // Agrega por dia e soma só os dias com rastreamento válido.
+    function connectAgg(rows){
+      const byDay={};
+      for(const r of rows){ const k=dkey(r.date); const o=byDay[k]||(byDay[k]={clk:0,pv:0}); o.clk+=r.clicks; o.pv+=r.pageview; }
+      let clk=0,pv=0;
+      for(const k in byDay){ const o=byDay[k]; if(o.pv===0 && o.clk>0) continue; clk+=o.clk; pv+=o.pv; }
+      return div(pv,clk)*100;
+    }
+    function metaAgg(rows){
+      let cost=0,imp=0,reach=0,clk=0,pv=0,ic=0,comp=0,fat=0;
+      for(const r of rows){ cost+=r.cost;imp+=r.impressions;reach+=r.reach;clk+=r.clicks;pv+=r.pageview;ic+=r.ic;comp+=r.compras;fat+=r.faturamento; }
+      // Vendas vêm da planilha (o Meta sub-reporta). Ajustado aqui, na raiz, pra
+      // CPA/ticket/tx de conversão saírem certos em TODAS as abas de uma vez.
+      const t=viewTarget(rows); if(t!=null) comp=t;
+      return { investido:cost, impressoes:imp, alcance:reach, cliques:clk, pageviews:pv, initiate_checkout:ic, vendas:comp, faturamento:fat,
+        ctr:div(clk,imp)*100, cpm:div(cost,imp)*1000, cpc:div(cost,clk), cpa:div(cost,comp), roas:div(fat,cost), ticket:div(fat,comp), connect_rate:connectAgg(rows) };
+    }
+    function topBy(rows, field, n){
+      const by={}; for(const r of rows){ const k=r[field]||'—'; by[k]=(by[k]||0)+1; }
+      return Object.entries(by).map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count).slice(0,n);
+    }
+    function anuncios(rows){
+      const by={};
+      for(const r of rows){ const key=r.anuncio||r.campanha||'(sem nome)'; let o=by[key];
+        if(!o) o=by[key]={nome:key,link:r.link,cost:0,impressions:0,clicks:0,ic:0,raw:0,faturamento:0,status:'',_sd:null,_rk:9};
+        o.cost+=r.cost;o.impressions+=r.impressions;o.clicks+=r.clicks;o.ic+=r.ic;o.raw+=r.compras;o.faturamento+=r.faturamento;
+        if(!o.link&&r.link)o.link=r.link;
+        accStatus(o,r);
+      }
+      const list=Object.values(by);
+      const vend=vendasAdj(list.map(o=>o.raw), rows, list.map(o=>o.cost));   // soma = total da planilha
+      return list.map((o,i)=>({nome:o.nome,link:o.link,status:o.status,investido:o.cost,impressoes:o.impressions,cliques:o.clicks,
+        initiate_checkout:o.ic,vendas:vend[i],faturamento:o.faturamento,cpa:div(o.cost,vend[i]),roas:div(o.faturamento,o.cost),ctr:div(o.clicks,o.impressions)*100}))
+        .sort((a,b)=>b.investido-a.investido);
+    }
+
+    // ── Render ──────────────────────────────────────────────────────────────────
+    const ARC=298.5;
+    function gauge(id, title, atual, meta, fmt, mediaDia, metaDia, pace, sub){
+      const pct = meta? Math.min(100,Math.max(0,atual/meta*100)) : 0;
+      return `<div class="gauge-card"><div class="gauge-title">${title}</div>
+        ${sub?`<div class="gauge-sub">${sub}</div>`:''}
+        <div class="gauge-wrap"><svg class="gauge-svg" viewBox="0 0 200 140">
+          <path class="gauge-track" d="M5,110 A95,95,0,0,1,195,110"/>
+          <path class="gauge-fill" d="M5,110 A95,95,0,0,1,195,110" stroke="url(#pg)"
+            stroke-dasharray="${ARC} ${ARC}" stroke-dashoffset="${ARC*(1-pct/100)}"/>
+          <defs><linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5a3f93"/><stop offset="100%" stop-color="#a78bdf"/></linearGradient></defs>
+          <text x="5" y="132" class="gauge-leg" text-anchor="middle" fill="rgba(255,255,255,.7)">${fmt(atual)}</text>
+          <text x="195" y="132" class="gauge-leg" text-anchor="middle" fill="rgba(255,255,255,.35)">${meta?fmt(meta):'—'}</text>
+        </svg><div class="gauge-pct">${meta>0?pct.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':fmt(atual)}</div></div>
+        <div class="gauge-stats">
+          <div class="gauge-stat"><div class="gauge-stat-l">Média/dia</div><div class="gauge-stat-v">${mediaDia}</div></div>
+          <div class="gauge-stat"><div class="gauge-stat-l">Meta/dia</div><div class="gauge-stat-v">${metaDia}</div></div>
+          ${pace?`<div class="gauge-stat"><div class="gauge-stat-l">Precisa/dia</div><div class="gauge-stat-v ${pace.cls}" title="${pace.tip}">${pace.txt}</div></div>`:''}
+        </div></div>`;
+    }
+    function card(k,v,cls,prev,tax){ return `<div class="card ${cls&&cls.includes('hl')?'hl':''}"><div class="k">${k}</div>${prev?`<div class="prev">${prev}</div>`:''}<div class="v ${cls||''}">${v}</div>${tax?`<div class="tax">${tax}</div>`:''}</div>`; }
+
+    let charts=[];
+    function killCharts(){ charts.forEach(c=>{try{c.destroy();}catch(e){}}); charts=[]; }
+
+    function render(){
+      killCharts();
+      const mrows = (profile==='malu'?DATA.malu:profile==='hire'?DATA.hire:DATA.malu.concat(DATA.hire)).filter(r=>inRange(r.date));
+      const urows = (profile==='malu'?DATA.umalu:profile==='hire'?DATA.uhire:DATA.umalu.concat(DATA.uhire)).filter(r=>inRange(r.date));
+      // Verba por frente: lembrete e mentoria têm meta própria e não poluem o CPA/
+      // investido do lançamento de ingresso. Os KPIs abaixo usam só INGRESSO.
+      const launchRows = mrows.filter(r=>r.bucket==='ingresso');
+      const byBucket = {ingresso:0,lembrete:0,mentoria:0,visitas:0,whats:0};
+      for(const r of mrows){ byBucket[r.bucket]=(byBucket[r.bucket]||0)+r.cost; }
+      const k=metaAgg(launchRows), m=DATA.metas;
+      const leads=urows.length;
+
+      // dias
+      const today=new Date(); today.setHours(0,0,0,0);
+      const daysElapsed=Math.max(1, Math.round((today-START)/864e5)+1);
+      const daysTotal=Math.max(1, Math.round((EVENT-START)/864e5)+1);
+      const cpl=div(k.investido,leads);
+
+      const mc = DATA.metricas && DATA.metricas.latest;
+      const metaIng  = mc ? mc.meta : 2000;              // meta total de ingressos
+      const metaTraf = m.leads || 1170;                  // "Trafego meta leads" (aba Metas)
+      const metaOrg  = Math.max(0, metaIng - metaTraf);  // 1.800 − 1.170 = 630
+      // Orgânico e total somam os valores DIÁRIOS dentro do filtro (antes liam o
+      // acumulado da última linha e ignoravam o período escolhido).
+      const orgSales = mc ? cumInRange('org') : 0;
+      const vAds = k.vendas;                             // metaAgg já traz o da planilha
+      const ingressos = mc ? orgSales + adsTarget() : k.vendas;
+      // Média/dia: cada métrica divide pelos dias que ELA rodou, dentro do filtro.
+      // O tráfego começou em 13/07 e o orgânico em 10/07 — dividir os dois pelos
+      // mesmos dias subestimaria o ads (diluiria por dias em que ele nem existia).
+      const _ser  = ((DATA.metricas&&DATA.metricas.series)||[]).filter(s=>s.hasData && inRange(s.date));
+      const ddTot = Math.max(1, _ser.length);                     // dias com dado
+      const ddAds = Math.max(1, _ser.filter(s=>s.ads>0).length);  // dias com tráfego
+      // Pace real: quanto FALTA ÷ dias que restam até o evento. A "meta/dia" é o
+      // ritmo teórico calculado desde o dia 1 e não se corrige conforme atrasamos;
+      // este é o número acionável — o ritmo necessário de amanhã em diante.
+      const diasRest=Math.max(1, Math.round((EVENT-today)/864e5));
+      function paceOf(atual, meta, ritmoAtual, f, okTxt){
+        if(!meta) return null;
+        f = f || NUM;
+        const falta=meta-atual;
+        if(falta<=0) return { txt:okTxt||'meta batida', cls:'pc-ok', tip:'Meta atingida' };
+        const need=Math.ceil(falta/diasRest);
+        // Verde quando o ritmo já alcançado dá conta; vermelho quando é preciso acelerar.
+        const cls = ritmoAtual>=need ? 'pc-ok' : 'pc-bad';
+        return { txt:f(need), cls,
+          tip:f(falta)+' restantes ÷ '+diasRest+' dias até 21/11 · ritmo atual '+f(ritmoAtual)+'/dia' };
+      }
+      const rAds=Math.round(vAds/ddAds), rOrg=Math.round(orgSales/ddTot), rTot=Math.round(ingressos/ddTot);
+      // Investimento: dias decorridos desde o início do TRÁFEGO (o gasto começou lá),
+      // não desde o início da planilha — senão a média/dia sai diluída.
+      const rInv=k.investido/Math.max(1,ddAds);
+      const _disp=Math.max(0, m.investimento-k.investido);
+      let h='';
+      h+=`<div class="gauges">`;
+      h+=gauge('g1','Vendas Tráfego', vAds, metaTraf, NUM, NUM(rAds), NUM(Math.round(metaTraf/daysTotal)), paceOf(vAds,metaTraf,rAds));
+      h+=gauge('g2','Vendas Orgânico', orgSales, metaOrg, NUM, NUM(rOrg), metaOrg>0?NUM(Math.round(metaOrg/daysTotal)):'—', paceOf(orgSales,metaOrg,rOrg), metaOrg>0?'':'acumulado');
+      h+=gauge('g3','Total Geral', ingressos, metaIng, NUM, NUM(rTot), NUM(Math.round(metaIng/daysTotal)), paceOf(ingressos,metaIng,rTot));
+      h+=gauge('g4','Investimento', k.investido, m.investimento, BRLk, BRLk(rInv), BRLk(m.investimento/daysTotal),
+             paceOf(k.investido, m.investimento, rInv, BRLk, 'verba usada'), 'Disponível: '+BRLk(_disp));
+      h+=`</div>`;
+
+      // ── Frentes do lançamento (verba separada por objetivo) ──
+      h+=`<div class="lbl">Frentes do Lançamento — verba separada por objetivo</div><div class="grid">`;
+      h+=card('Ingresso · Workshop', BRLk(byBucket.ingresso), 'accent', 'Verba total: '+BRLk(m.investimento), PCT(div(byBucket.ingresso,m.investimento)*100)+' da verba')
+        +card('Lembrete', BRLk(byBucket.lembrete), '', 'verba por objetivo', byBucket.lembrete>0?'':'sem campanha ativa')
+        +card('Mentoria', BRLk(byBucket.mentoria), '', 'checkout · produto separado', 'ver aba Vendas')
+        +card('Whats', BRLk(byBucket.whats), '', 'mentoria por WhatsApp', 'ver aba Whats');
+      h+=`</div>`;
+
+      // ── 1) Tráfego · Ads (Meta Ads) ──
+      h+=`<div class="lbl">Tráfego · Ads (Meta Ads)</div><div class="grid">`;
+      h+=card('Investimento Total', BRL(k.investido), 'hl v', 'Previsto: '+BRLk(m.investimento), 'Taxa investida '+PCT(div(k.investido,m.investimento)*100))
+        +card('Vendas Ads', NUM(vAds), 'accent', mc?'Fonte: planilha':'')
+        +(mc?card('START ADS', NUM(cumInRange('startAds'))):'')
+        +(mc?card('VIP ADS', NUM(cumInRange('vipAds'))):'')
+        +card('CPA', vAds>0?BRL(k.cpa):'—')   // sem venda: '—', senão R$0,00 lê como CPA ótimo
+        +card('CTR', PCT(k.ctr));
+      h+=`</div>`;
+
+      // ── 2) Vendas Orgânicas ──
+      if(mc){
+        h+=`<div class="lbl">Vendas Orgânicas</div><div class="grid">`;
+        // % da meta calculado sobre os ingressos mostrados. O "% META" da planilha
+        // considera só o orgânico, então dava 5,89% ao lado de um total de 156.
+        h+=card('Ingressos Vendidos', NUM(ingressos), 'hl v', 'Meta: '+NUM(metaIng), PCT(div(ingressos,metaIng)*100)+' da meta')
+          +card('Vendas Workshop ORG', NUM(orgSales), 'accent')
+          +card('START ORG', NUM(cumInRange('startOrg')))
+          +card('VIP ORG', NUM(cumInRange('vipOrg')))
+          +card('Grupo WhatsApp START', NUM(cumInRange('waStart')))
+          +card('Grupo WhatsApp VIP', NUM(cumInRange('waVip')));
+        h+=`</div>`;
+      }
+
+      // ── 3) Gráfico por dia (largura total) ──
+      h+=`<div class="lbl">Vendas por Dia — Orgânico × Ads + Investimento e CPA</div>
+        <div class="chart-card"><div class="chart-box tall"><canvas id="cDia"></canvas></div></div>`;
+
+      // ── 4) Origem dos cadastros (UTMs) — 3 colunas ──
+      h+=`<div class="lbl">Origem dos Cadastros (UTMs)</div>`+ (urows.length ? `<div class="charts3">
+        <div class="chart-card"><div class="chart-title">Origem</div><div class="chart-box tall"><canvas id="cOrig"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Top Anúncios</div><div class="chart-box tall"><canvas id="cAds"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Públicos</div><div class="chart-box tall"><canvas id="cPub"></canvas></div></div>
+      </div>` : `<div class="note">Aguardando a planilha de UTMs por lead deste lançamento (origem dos cadastros).</div>`);
+
+      document.getElementById('body').innerHTML=h;
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const footEl=document.getElementById('foot'); if(footEl) footEl.textContent='Atualiza a cada abertura · dados de 23/10 em diante · investimento convertido a R$ '+(m.cotacao||5.19).toLocaleString('pt-BR',{minimumFractionDigits:2})+'/US$';
+
+      // Charts — vendas Orgânico (verde) + Ads (roxo) empilhadas + investido/dia (linha). Só dias com dado.
+      const invByDay={};
+      for(const r of launchRows){ const kd=dkey(r.date); invByDay[kd]=(invByDay[kd]||0)+r.cost; }
+      // Vendas Ads/dia: número real da planilha, rateado pro perfil selecionado.
+      const pagoByDay = adsByDay(mrows);
+      const orgByDay={}; ((DATA.metricas&&DATA.metricas.series)||[]).forEach(s=>{ const v=Math.max(0, s.paceDia||0); if(v>0) orgByDay[dkey(s.date)]=v; });
+      const _dset=new Set([...Object.keys(invByDay).filter(k=>invByDay[k]>0||pagoByDay[k]>0), ...Object.keys(orgByDay)]);
+      const _dates=[..._dset].sort();
+      const dlabels=_dates.map(k=>{const p=k.split('-');return p[2]+'/'+p[1];});
+      charts.push(new Chart(document.getElementById('cDia'),{
+        data:{ labels:dlabels, datasets:[
+          { type:'bar', label:'Vendas Orgânicas', data:_dates.map(k=>orgByDay[k]||0), backgroundColor:'#4ade80cc', borderColor:'#4ade80', borderWidth:0, borderRadius:4, stack:'v', yAxisID:'y' },
+          { type:'bar', label:'Vendas Ads', data:_dates.map(k=>pagoByDay[k]||0), backgroundColor:'#b565d6cc', borderRadius:4, stack:'v', yAxisID:'y' },
+          { type:'line', label:'Investido/dia', data:_dates.map(k=>invByDay[k]||0), borderColor:'#e6ccf5', backgroundColor:'rgba(230,204,245,.12)', borderWidth:2, pointRadius:3, pointBackgroundColor:'#e6ccf5', tension:.35, yAxisID:'y1' },
+          // CPA/dia = investido ÷ vendas ads do dia. Eixo próprio: o CPA (~R$80) é
+          // uma ordem de grandeza menor que o investido (~R$1.800) e sumiria no y1.
+          // null nos dias sem venda (não desenha ponto em vez de fingir CPA 0).
+          { type:'line', label:'CPA/dia', data:_dates.map(k=>{ const v=pagoByDay[k]||0; return v>0?+((invByDay[k]||0)/v).toFixed(2):null; }),
+            borderColor:'#fbbf24', backgroundColor:'transparent', borderWidth:2, borderDash:[5,4], pointRadius:3, pointBackgroundColor:'#fbbf24', tension:.35, spanGaps:true, yAxisID:'y2' },
+        ]},
+        options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+          plugins:{ legend:{labels:{color:'#cbb8dd',boxWidth:14,font:{size:12}}},
+            tooltip:{callbacks:{label:c=>{ const l=c.dataset.label;
+              return (l.indexOf('Investido')>=0||l.indexOf('CPA')>=0) ? ` ${l}: `+BRL(c.parsed.y) : ` ${l}: ${c.parsed.y}`; }}} },
+          scales:{ x:{stacked:true,grid:{color:'#ffffff08'},ticks:{color:'#9a8bb0',font:{size:11}}}, y:{stacked:true,grid:{color:'#ffffff08'},ticks:{color:'#9a8bb0'},beginAtZero:true},
+            y1:{position:'right',grid:{drawOnChartArea:false},ticks:{color:'#b6a6d6',maxTicksLimit:6,callback:v=>'R$'+Math.round(v)},beginAtZero:true},
+            y2:{position:'right',grid:{drawOnChartArea:false},ticks:{display:false},beginAtZero:true} } }
+      }));
+      pie('cOrig', topBy(urows,'source',8));
+      hbar('cAds',  topBy(urows,'content',8));
+      hbar('cPub',  topBy(urows,'term',8));
+    }
+
+    function pie(id, items){
+      const el=document.getElementById(id); if(!el) return;
+      const colors=['#c07be0','#8b5cf6','#a855c8','#6a2585','#d9b8ec','#7b3f98','#b565d6','#5b3f88'];
+      const tot=items.reduce((s,i)=>s+i.count,0)||1;
+      const labelPlugin={ id:'pieL_'+id, afterDatasetsDraw(ch){ const ctx=ch.ctx; const ds=ch.data.datasets[0].data; const t=ds.reduce((s,v)=>s+v,0)||1;
+        ctx.save(); ctx.font='800 12px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ch.getDatasetMeta(0).data.forEach((arc,i)=>{ const pct=ds[i]/t*100; if(pct<4) return;
+          const ang=(arc.startAngle+arc.endAngle)/2, r=(arc.innerRadius+arc.outerRadius)/2;
+          const x=arc.x+Math.cos(ang)*r, y=arc.y+Math.sin(ang)*r;
+          ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=4; ctx.fillText(pct.toFixed(1)+'%', x, y);
+        }); ctx.restore();
+      }};
+      charts.push(new Chart(el,{ type:'doughnut',
+        data:{ labels:items.map(i=>i.label.length>22?i.label.slice(0,21)+'…':i.label), datasets:[{ data:items.map(i=>i.count), backgroundColor:colors, borderColor:'#0d0912', borderWidth:2 }] },
+        options:{ responsive:true, maintainAspectRatio:false, cutout:'56%',
+          plugins:{ legend:{position:'right',labels:{color:'#cbb8dd',font:{size:12},boxWidth:12,padding:9}},
+            tooltip:{callbacks:{label:c=>' '+c.label+': '+NUM(c.parsed)+' ('+(c.parsed/tot*100).toFixed(1)+'%)'}} } },
+        plugins:[labelPlugin]
+      }));
+    }
+    function hbar(id, items){
+      const el=document.getElementById(id); if(!el) return;
+      const valPlugin={ id:'v'+id, afterDatasetsDraw(ch){ const c=ch.ctx; c.save(); ch.getDatasetMeta(0).data.forEach((bar,i)=>{ const v=ch.data.datasets[0].data[i]; c.fillStyle='rgba(255,255,255,.85)'; c.font='600 12px system-ui'; c.textAlign='left'; c.textBaseline='middle'; c.fillText(v, bar.x+6, bar.y); }); c.restore(); } };
+      charts.push(new Chart(el,{ type:'bar', data:{ labels:items.map(i=>i.label.length>26?i.label.slice(0,25)+'…':i.label), datasets:[{ data:items.map(i=>i.count), backgroundColor:'#b565d6cc', borderRadius:5, barThickness:20 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.x+' cadastros'}}},
+          scales:{ x:{display:false,beginAtZero:true}, y:{grid:{display:false},ticks:{color:'#ccc',font:{size:12}}} }, layout:{padding:{right:34}} },
+        plugins:[valPlugin] }));
+    }
+
+    // ── Aba PESQUISA (credenciamento) — lê a planilha da pesquisa e agrega ao vivo ──
+    const SHEET_PESQUISA=SHEET_PESQUISA_ID;
+    let _pesq=null;
+    const _ps=c=>(c&&c.v!=null)?String(c.v).trim():'';
+    function _pqAgg(idx, top, norm){
+      const m={};
+      for(const r of _pesq){ const raw=_ps(r.c[idx]); const v=norm?norm(raw):(raw||'—'); if(v==null||v==='') continue; m[v]=(m[v]||0)+1; }
+      const a=Object.entries(m).map(([label,count])=>({label,count})).sort((x,y)=>y.count-x.count);
+      return top?a.slice(0,top):a;
+    }
+    const _pqSN=v=>/^s/i.test(v)?'Sim':(/^n/i.test(v)?'Não':(v||'—'));
+    const _pqFoco=v=>/remoto/i.test(v)?'Trabalho remoto':/moeda|ganhar/i.test(v)?'Moeda forte':/sair/i.test(v)?'Sair do Brasil':(v||'—');
+    const _pqProf=v=>{ v=(v||'').split('(')[0].trim(); return /^outro/i.test(v)?'':v; };  // '' = ignora "OUTRO"
+    const _pqCard=(t,id,cls)=>`<div class="pq-card ${cls||''}"><h4>${t}</h4><div class="pq-cw"><canvas id="${id}"></canvas></div></div>`;
+    const _pqCloud=(t,id)=>`<div class="pq-card pq-wide"><h4>${t}</h4><div class="wc" id="${id}"></div></div>`;
+    const _pqPct=(n,d)=>d?Math.round(n/d*100)+'%':'—';
+    // Nuvem de palavras (CSS): tamanho da fonte proporcional à frequência.
+    function wordCloud(id, items){
+      const el=document.getElementById(id); if(!el||!items.length) return;
+      const mx=items[0].count, mn=items[items.length-1].count;
+      const cols=['#c07be0','#8b5cf6','#a855c8','#d9b8ec','#b565d6','#7b3f98','#c898ea','#9a6fd0','#e0b3f5'];
+      el.innerHTML=items.map((it,i)=>{
+        const t=(it.count-mn)/((mx-mn)||1), sz=(1+t*2.6).toFixed(2), op=(.55+t*.45).toFixed(2);
+        return `<span class="wcw" style="font-size:${sz}rem;color:${cols[i%cols.length]};opacity:${op}" title="${it.label}: ${it.count} (${(it.count/_pesq.length*100).toFixed(1)}%)">${it.label}</span>`;
+      }).join('');
+    }
+    async function renderPesquisa(){
+      killCharts();
+      const body=document.getElementById('body');
+      if(!_pesq){
+        body.innerHTML='<div class="loading">Carregando a pesquisa…</div>';
+        try{ const t=await gviz(SHEET_PESQUISA,'gid=0'); _pesq=(t.rows||[]).filter(r=>r.c&&_ps(r.c[6])); }
+        catch(e){ body.innerHTML='<div class="empty err">Erro ao carregar a pesquisa: '+e.message+'</div>'; return; }
+      }
+      const N0=_pesq.length, cnt=(i,p)=>_pesq.filter(r=>p(_ps(r.c[i]))).length;
+      const ing=cnt(10,v=>/fluente|me viro/i.test(v)), exp5=cnt(7,v=>/mais de 10|5 a 10/i.test(v)),
+        sal5=cnt(6,v=>/5 a 10|mais de 10/i.test(v)), pass=cnt(9,v=>/^n/i.test(v));
+      body.innerHTML=`<div class="lbl">Pesquisa de credenciamento · ${NUM(N0)} respostas · atualiza sozinho</div>
+        <div class="pk-strip">
+          <div class="pk"><div class="pk-l">Respostas</div><div class="pk-v">${NUM(N0)}</div><div class="pk-n">total</div></div>
+          <div class="pk"><div class="pk-l">Inglês interm.+</div><div class="pk-v">${_pqPct(ing,N0)}</div><div class="pk-n">fluente ou "me viro"</div></div>
+          <div class="pk"><div class="pk-l">Exp. 5+ anos</div><div class="pk-v">${_pqPct(exp5,N0)}</div><div class="pk-n">senioridade</div></div>
+          <div class="pk"><div class="pk-l">Salário 5k+</div><div class="pk-v">${_pqPct(sal5,N0)}</div><div class="pk-n">poder de compra</div></div>
+          <div class="pk"><div class="pk-l">Sem passaporte UE</div><div class="pk-v">${_pqPct(pass,N0)}</div><div class="pk-n">precisam de visto</div></div>
+        </div>
+        <div class="pq-grid">
+          ${_pqCard('Foco hoje','pqFoco')}
+          ${_pqCard('Nível de inglês','pqIng')}
+          ${_pqCard('Faixa salarial','pqSal')}
+          ${_pqCard('Experiência','pqExp')}
+          ${_pqCard('Idade','pqIda')}
+          ${_pqCard('Passaporte europeu','pqPass')}
+          ${_pqCard('Já morou fora?','pqFora')}
+          ${_pqCard('Há quanto tempo segue','pqSeg')}
+          ${_pqCloud('Área / profissão','pqProf')}
+          ${_pqCard('Estado','pqEst','pq-wide')}
+        </div>`;
+      pie('pqFoco',_pqAgg(5,null,_pqFoco));
+      pie('pqIng',_pqAgg(10));
+      pie('pqSal',_pqAgg(6));
+      hbar('pqExp',_pqAgg(7));
+      pie('pqIda',_pqAgg(3));
+      wordCloud('pqProf',_pqAgg(13,14,_pqProf));
+      pie('pqPass',_pqAgg(9,null,_pqSN));
+      pie('pqFora',_pqAgg(16));
+      hbar('pqSeg',_pqAgg(15));
+      hbar('pqEst',_pqAgg(17,14));
+      const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+
+    let view='geral', vendasGroup='criativo';
+    function route(){
+      if(view==='campanhas') return renderCampanhas();
+      if(view==='publicos') return renderPublicos();
+      if(view==='criativos') return renderCriativos();
+      if(view==='lp') return renderLP();
+      if(view==='pesquisa') return renderPesquisa();
+      if(view==='vendas') return renderVendas();
+      if(view==='whats') return renderWhats();
+      profile=view; render();
+    }
+    function setTab(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); view=el.dataset.p; try{history.replaceState(null,'','#'+view);}catch(e){} route(); }
+    function setPreset(el){
+      document.querySelectorAll('.preset').forEach(t=>t.classList.remove('active'));
+      el.classList.add('active'); presetDays=el.dataset.d;
+      fStart=fEnd=null;                       // preset limpa o De/Até
+      document.getElementById('dDe').value=''; document.getElementById('dAte').value='';
+      document.getElementById('dClear').style.display='none';
+      route();
+    }
+    const _pDate = v => { if(!v) return null; const p=v.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); };
+    function setDates(){
+      fStart=_pDate(document.getElementById('dDe').value);
+      fEnd  =_pDate(document.getElementById('dAte').value);
+      if(fStart && fEnd && fStart>fEnd){      // inverteu? troca em vez de zerar tudo
+        const t=fStart; fStart=fEnd; fEnd=t;
+        document.getElementById('dDe').value=dkey(fStart);
+        document.getElementById('dAte').value=dkey(fEnd);
+      }
+      if(fStart||fEnd){                       // De/Até limpa o preset
+        presetDays='all';
+        document.querySelectorAll('.preset').forEach(t=>t.classList.remove('active'));
+        document.getElementById('dClear').style.display='';
+      } else { document.querySelector('.preset[data-d="all"]').classList.add('active');
+        document.getElementById('dClear').style.display='none'; }
+      route();
+    }
+    function clearDates(){
+      fStart=fEnd=null; presetDays='all';
+      document.getElementById('dDe').value=''; document.getElementById('dAte').value='';
+      document.getElementById('dClear').style.display='none';
+      document.querySelectorAll('.preset').forEach(t=>t.classList.remove('active'));
+      document.querySelector('.preset[data-d="all"]').classList.add('active');
+      route();
+    }
+
+    // ── Ordenação de tabelas (clicar no cabeçalho) ──────────────────────────────
+    let _sortState={};
+    function doSort(tab,key){ const st=_sortState[tab]||(_sortState[tab]={key:key,dir:-1}); if(st.key===key) st.dir=-st.dir; else { st.key=key; st.dir=-1; } route(); }
+    function sortRows(tab, rows, defKey){
+      const st=_sortState[tab]||(_sortState[tab]={key:defKey,dir:-1});
+      return rows.slice().sort((a,b)=>{ let va=a[st.key], vb=b[st.key];
+        if(va==null||va==='')va=-Infinity; if(vb==null||vb==='')vb=-Infinity;
+        if(typeof va==='number'&&typeof vb==='number') return (va-vb)*st.dir;
+        return String(va).localeCompare(String(vb),'pt')*st.dir; });
+    }
+    function sortTh(tab,key,label,left){ const st=_sortState[tab]||{}; const ar=st.key===key?(st.dir<0?' ↓':' ↑'):''; return `<th class="sortable" onclick="doSort('${tab}','${key}')"${left?' style="text-align:left"':''}>${label}${ar}</th>`; }
+
+    // ── Campanhas / Públicos / Criativos ────────────────────────────────────────
+    function campType(name){ if(/_Q(\b|_)|\[Q\]|QUENTE|RMKT|REMARK/i.test(name)) return 'quente'; if(/_F(\b|_)|\[F\]|\bFRIO\b/i.test(name)) return 'frio'; return '—'; }
+
+    // Status efetivo do Meta → selo. ACTIVE=ativo; qualquer *PAUSED=pausado;
+    // DISAPPROVED=reprovado. rank ordena (ativo primeiro). Usado pra pegar o
+    // estado mais "ativo" na data mais recente de cada grupo.
+    function statusInfo(raw){
+      const s=String(raw||'').toUpperCase();
+      if(s==='ACTIVE')      return { txt:'Ativo',     cls:'st-on',   rank:0 };
+      if(s==='DISAPPROVED') return { txt:'Reprovado', cls:'st-bad',  rank:2 };
+      if(s.indexOf('PAUSED')>=0) return { txt:'Pausado', cls:'st-off', rank:1 };
+      return { txt:'—', cls:'st-none', rank:3 };
+    }
+    // Acumula, num objeto de grupo, o status mais recente/ativo (min rank na maior data).
+    function accStatus(o, r){
+      if(!r.status) return;
+      const rk=statusInfo(r.status).rank;
+      if(!o._sd || r.date>o._sd){ o._sd=r.date; o.status=r.status; o._rk=rk; }
+      else if(o._sd && r.date.getTime()===o._sd.getTime() && rk<o._rk){ o.status=r.status; o._rk=rk; }
+    }
+    const stBadge = raw => { const s=statusInfo(raw); return `<span class="st ${s.cls}">${s.txt}</span>`; };
+    const stKey = raw => statusInfo(raw).cls.slice(3);   // 'on'|'off'|'bad'|'none'
+
+    // ── Override manual de status (pausar/ativar na mão, salvo no servidor) ──────
+    // O status continua vindo AUTOMÁTICO da planilha; o override só sobrepõe quando
+    // existe. Salvo no cardo-sinapse (persiste entre PC/celular — nada de localStorage).
+    const OVR_API='https://sinapse.cardomarketing.com.br/api/dash-overrides';
+    const OVR_SCOPE='wnc';
+    const STK={ on:{txt:'Ativo',cls:'st-on'}, off:{txt:'Pausado',cls:'st-off'}, bad:{txt:'Reprovado',cls:'st-bad'}, none:{txt:'—',cls:'st-none'} };
+    let STATUS_OVR={};
+    const ovrK=(type,name)=>type+':'+name;
+    const escA=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    function effInfo(type,name,autoRaw){ const o=STATUS_OVR[ovrK(type,name)]; return o?{...STK[o],man:true}:{...statusInfo(autoRaw),man:false}; }
+    function effKeyF(type,name,autoRaw){ const o=STATUS_OVR[ovrK(type,name)]; return o||stKey(autoRaw); }
+    // Selo clicável: 1 clique força Pausado, 2 força Ativo, 3 volta ao Automático.
+    function stBadgeClk(type,name,autoRaw){
+      const e=effInfo(type,name,autoRaw);
+      const t=e.man?'manual — clique: Pausado → Ativo → voltar ao Automático':'automático — clique p/ forçar manual';
+      return `<span class="st ${e.cls} stclk${e.man?' st-man':''}" title="${t}" data-nm="${escA(name)}" onclick="cycleStatus('${type}',this)">${e.txt}${e.man?' <span class="stov">•</span>':''}</span>`;
+    }
+    let _ovrTmr=null;
+    function saveOverrides(tries){
+      clearTimeout(_ovrTmr);
+      _ovrTmr=setTimeout(()=>{
+        fetch(OVR_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scope:OVR_SCOPE,data:STATUS_OVR})})
+          .then(r=>r.json()).then(j=>{ if(!(j&&j.ok)) throw 0; })
+          .catch(()=>{ if((tries||0)<4) setTimeout(()=>saveOverrides((tries||0)+1), 1200); });
+      }, 350);
+    }
+    async function loadOverrides(){
+      try{ const r=await fetch(OVR_API+'?scope='+OVR_SCOPE,{cache:'no-store'}); const j=await r.json();
+        if(j&&j.ok&&j.data&&typeof j.data==='object') STATUS_OVR=j.data; }catch(e){ /* offline → sem override */ }
+    }
+    // Ciclo: Automático → Pausado(off) → Ativo(on) → Automático. Salva e re-renderiza.
+    function cycleStatus(type, el){
+      const name=el.getAttribute('data-nm'); if(name==null) return;
+      const k=ovrK(type,name), cur=STATUS_OVR[k];
+      let next; if(cur===undefined) next='off'; else if(cur==='off') next='on'; else next=undefined;
+      if(next===undefined) delete STATUS_OVR[k]; else STATUS_OVR[k]=next;
+      saveOverrides(0);
+      route();   // re-renderiza a aba atual (atualiza selo + filtro por status)
+    }
+
+    // Filtro combinado (nome + status) por aba. Estado persiste entre re-renders
+    // (ordenação), então o filtro não some ao clicar num cabeçalho.
+    let _flt = { campanhas:{q:'',st:''}, publicos:{q:'',st:''}, criativos:{q:'',st:''} };
+    function filterBar(tab){
+      const f=_flt[tab];
+      const b=(v,lbl)=>`<button class="stbtn${f.st===v?' active':''}" onclick="setStFilter('${tab}','${v}',this)">${lbl}</button>`;
+      return `<div class="fbar"><input class="w3filter" id="w3f_${tab}" placeholder="Filtrar por nome…" value="${(f.q||'').replace(/"/g,'&quot;')}" oninput="_flt['${tab}'].q=this.value.toLowerCase();applyFilter('${tab}')">`+
+        `<div class="stbtns">${b('','Todas')}${b('on','Ativas')}${b('off','Pausadas')}</div></div>`;
+    }
+    function setStFilter(tab,val,btn){
+      _flt[tab].st=val;
+      if(btn){ btn.parentNode.querySelectorAll('.stbtn').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); }
+      applyFilter(tab);
+    }
+    function applyFilter(tab){
+      const sel={campanhas:'.crow',publicos:'.purow',criativos:'.crrow'}[tab], f=_flt[tab];
+      document.querySelectorAll(sel).forEach(function(tr){
+        const okN=(tr.dataset.n||'').indexOf(f.q||'')>=0;
+        const okS=!f.st||tr.dataset.st===f.st;
+        tr.style.display=(okN&&okS)?'':'none';
+      });
+    }
+
+    // ── Página da LP (A/B/C/D) a partir do nome da campanha ────────────────────
+    // Regra: a letra da página é a que sobra DEPOIS do marcador de temperatura,
+    // no FIM do nome. Sem letra sobrando → página C (foi a primeira, criada antes
+    // da convenção existir). Ex.: _Vendas_F → C · _Vendas_F_D → D · _Vendas_Q → C
+    // CUIDADO: _F e _Q são frio/quente, NÃO páginas — daí o descarte explícito.
+    function campPage(nome){
+      const U=String(nome||'').toUpperCase();
+      if(/_9[_.,]?90|TRIPWIRE/.test(U)) return '9,90';   // campanha direto pro checkout (Hotmart)
+      const m=U.match(/_PAG_([ABC])/);                    // _Pag_A / _Pag_B / _Pag_C
+      if(m) return m[1];
+      return 'A';   // Hire tem página única / default
+    }
+    // URL de cada página. Atenção à inversão: na URL a página A NÃO tem sufixo
+    // (malu-ads), enquanto no nome da campanha "sem letra" significa página C.
+    const LP_BASE='https://hirebrazil.com.br/workshop-nova-carreira-';
+    function lpUrl(perfil,pg){
+      const p=perfil.toLowerCase();
+      if(pg==='9,90') return 'https://pay.hotmart.com/C108102185B?off=mhv57vby';
+      return LP_BASE+p+'-ads-'+pg.toLowerCase();   // ex.: workshop-nova-carreira-malu-ads-a
+    }
+    function campaigns(rows){
+      const by={}, metaCPA=(DATA.metas&&DATA.metas.cpa)||71;
+      for(const r of rows){ const key=r.campanha||'—'; let o=by[key];
+        if(!o) o=by[key]={nome:key,cost:0,imp:0,clk:0,pv:0,ic:0,raw:0,status:'',_sd:null,_rk:9,_rows:[]};
+        o.cost+=r.cost; o.imp+=r.impressions; o.clk+=r.clicks; o.pv+=r.pageview; o.ic+=r.ic; o.raw+=r.compras;
+        o._rows.push(r); accStatus(o,r);
+      }
+      const list=Object.values(by);
+      const vend=vendasAdj(list.map(o=>o.raw), rows, list.map(o=>o.cost));   // soma = total da planilha
+      return list.map((o,i)=>{ const v=vend[i], cpa=div(o.cost,v);
+        let al='ok'; if(v===0) al='sem'; else if(cpa>metaCPA*1.5) al='critico'; else if(cpa>metaCPA) al='alto';
+        return { nome:o.nome, tipo:campType(o.nome), status:o.status, investido:o.cost, imp:o.imp, ctr:div(o.clk,o.imp)*100,
+          cliques:o.clk, pv:o.pv, cr:connectAgg(o._rows), checkout:o.ic, vendas:v, txconv:div(v,o.ic)*100, cpa, al };
+      }).sort((a,b)=>b.investido-a.investido);
+    }
+    let _campFilter='';
+    function renderCampanhas(){
+      killCharts();
+      const rows=DATA.malu.concat(DATA.hire).filter(r=>inRange(r.date));
+      const camps=sortRows('campanhas', campaigns(rows), 'investido');
+      const AL={ok:['OK','al-ok'],alto:['CPA Alto','al-alto'],critico:['CPA Crítico','al-crit'],sem:['Sem Venda','al-sem']};
+      const TP={quente:['Quente','tp-q'],frio:['Frio','tp-f'],'—':['—','tp-n']};
+      let h=`<div class="lbl">Performance por Campanha (${camps.length}) · meta CPA R$ ${((DATA.metas&&DATA.metas.cpa)||71).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+        ${filterBar('campanhas')}
+        <div class="twrap"><table><thead><tr>
+        ${sortTh('campanhas','nome','Campanha',1)}${sortTh('campanhas','status','Status')}${sortTh('campanhas','tipo','Tipo')}${sortTh('campanhas','investido','Investido')}${sortTh('campanhas','imp','Impr.')}${sortTh('campanhas','ctr','CTR')}${sortTh('campanhas','cliques','Cliques')}${sortTh('campanhas','pv','PV')}${sortTh('campanhas','cr','CR%')}${sortTh('campanhas','checkout','Checkout')}${sortTh('campanhas','vendas','Vendas')}${sortTh('campanhas','txconv','Tx.Conv')}${sortTh('campanhas','cpa','CPA')}${sortTh('campanhas','al','Alerta')}
+      </tr></thead><tbody>`;
+      if(!camps.length) h+=`<tr><td colspan="14" class="empty">Sem dados no período</td></tr>`;
+      else for(const c of camps){ const a=AL[c.al], t=TP[c.tipo];
+        h+=`<tr class="crow" data-n="${(c.nome||'').toLowerCase()}" data-st="${effKeyF('campanha',c.nome,c.status)}"><td title="${c.nome}">${c.nome}</td>
+          <td>${stBadgeClk('campanha',c.nome,c.status)}</td><td><span class="tp ${t[1]}">${t[0]}</span></td><td>${BRL(c.investido)}</td><td>${NUM(c.imp)}</td><td>${PCT(c.ctr)}</td>
+          <td>${NUM(c.cliques)}</td><td>${NUM(c.pv)}</td><td>${PCT(c.cr)}</td><td>${NUM(c.checkout)}</td><td>${NUM(c.vendas)}</td>
+          <td>${PCT(c.txconv)}</td><td>${c.vendas>0?BRL(c.cpa):'—'}</td><td><span class="al ${a[1]}">${a[0]}</span></td></tr>`;
+      }
+      h+=`</tbody></table></div>`;
+      document.getElementById('body').innerHTML=h;
+      applyFilter('campanhas');
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+    function _hbarTab(title, items, cid){
+      killCharts();
+      const hgt=Math.max(300, items.length*34+20);
+      document.getElementById('body').innerHTML=`<div class="lbl">${title}</div><div class="chart-card"><div class="chart-box" style="height:${hgt}px"><canvas id="${cid}"></canvas></div></div>`;
+      hbar(cid, items);
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+    function renderPublicos(){
+      killCharts();
+      const rows=DATA.malu.concat(DATA.hire).filter(r=>inRange(r.date));
+      const metaCPA=(DATA.metas&&DATA.metas.cpa)||71;
+      const by={};
+      for(const r of rows){ const key=r.adset||'—'; let o=by[key];
+        if(!o) o=by[key]={nome:key,cost:0,imp:0,clk:0,ic:0,raw:0,status:'',_sd:null,_rk:9};
+        o.cost+=r.cost;o.imp+=r.impressions;o.clk+=r.clicks;o.ic+=r.ic;o.raw+=r.compras;
+        accStatus(o,r);
+      }
+      const plist=Object.values(by);
+      const pvend=vendasAdj(plist.map(o=>o.raw), rows, plist.map(o=>o.cost));   // soma = total da planilha
+      const pubs=sortRows('publicos', plist.map((o,i)=>{ const v=pvend[i], cpa=div(o.cost,v);
+        let al='ok'; if(v===0) al='sem'; else if(cpa>metaCPA*1.5) al='critico'; else if(cpa>metaCPA) al='alto';
+        return {nome:o.nome,status:o.status,investido:o.cost,imp:o.imp,ctr:div(o.clk,o.imp)*100,cliques:o.clk,ic:o.ic,vendas:v,cpa,al};
+      }), 'investido');
+      const AL={ok:['OK','al-ok'],alto:['CPA Alto','al-alto'],critico:['CPA Crítico','al-crit'],sem:['Sem Venda','al-sem']};
+      let h=`<div class="lbl">Públicos — Performance por Ad Set (${pubs.length})</div>
+        ${filterBar('publicos')}
+        <div class="twrap"><table><thead><tr>
+        ${sortTh('publicos','nome','Público (Ad Set)',1)}${sortTh('publicos','status','Status')}${sortTh('publicos','investido','Investido')}${sortTh('publicos','imp','Impressões')}${sortTh('publicos','cliques','Cliques')}${sortTh('publicos','ctr','CTR')}${sortTh('publicos','ic','Init. Checkout')}${sortTh('publicos','vendas','Vendas')}${sortTh('publicos','cpa','CPA')}<th>Alerta</th>
+      </tr></thead><tbody>`;
+      if(!pubs.length) h+=`<tr><td colspan="10" class="empty">Sem dados no período</td></tr>`;
+      else for(const p of pubs){ const b=AL[p.al];
+        h+=`<tr class="purow" data-n="${(p.nome||'').toLowerCase()}" data-st="${effKeyF('publico',p.nome,p.status)}"><td title="${p.nome}">${p.nome}</td><td>${stBadgeClk('publico',p.nome,p.status)}</td><td>${BRL(p.investido)}</td><td>${NUM(p.imp)}</td><td>${NUM(p.cliques)}</td><td>${PCT(p.ctr)}</td><td>${NUM(p.ic)}</td><td>${NUM(p.vendas)}</td><td>${p.vendas>0?BRL(p.cpa):'—'}</td><td><span class="al ${b[1]}">${b[0]}</span></td></tr>`;
+      }
+      h+=`</tbody></table></div>`;
+      document.getElementById('body').innerHTML=h;
+      applyFilter('publicos');
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+    function renderCriativos(){
+      killCharts();
+      const ads=sortRows('criativos', anuncios(DATA.malu.concat(DATA.hire).filter(r=>inRange(r.date))), 'investido');
+      const metaCPA=(DATA.metas&&DATA.metas.cpa)||71;
+      const AL={ok:['OK','al-ok'],alto:['CPA Alto','al-alto'],critico:['CPA Crítico','al-crit'],sem:['Sem Venda','al-sem']};
+      let h=`<div class="lbl">Criativos — Performance por Anúncio (${ads.length})</div>
+        ${filterBar('criativos')}
+        <div class="twrap"><table><thead><tr>
+        ${sortTh('criativos','nome','Anúncio',1)}${sortTh('criativos','status','Status')}${sortTh('criativos','investido','Investido')}${sortTh('criativos','impressoes','Impressões')}${sortTh('criativos','cliques','Cliques')}${sortTh('criativos','ctr','CTR')}${sortTh('criativos','initiate_checkout','Init. Checkout')}${sortTh('criativos','vendas','Vendas')}${sortTh('criativos','cpa','CPA')}<th>Alerta</th><th>Link</th>
+      </tr></thead><tbody>`;
+      if(!ads.length) h+=`<tr><td colspan="11" class="empty">Sem dados no período</td></tr>`;
+      else for(const a of ads){ let al='ok'; if(a.vendas===0) al='sem'; else if(a.cpa>metaCPA*1.5) al='critico'; else if(a.cpa>metaCPA) al='alto'; const b=AL[al];
+        h+=`<tr class="crrow" data-n="${(a.nome||'').toLowerCase()}" data-st="${effKeyF('criativo',a.nome,a.status)}"><td title="${a.nome}">${a.nome}</td><td>${stBadgeClk('criativo',a.nome,a.status)}</td><td>${BRL(a.investido)}</td><td>${NUM(a.impressoes)}</td><td>${NUM(a.cliques)}</td><td>${PCT(a.ctr)}</td><td>${NUM(a.initiate_checkout)}</td><td>${NUM(a.vendas)}</td><td>${a.vendas>0?BRL(a.cpa):'—'}</td><td><span class="al ${b[1]}">${b[0]}</span></td><td>${a.link?`<a class="vlink" href="${a.link}" target="_blank">ver criativo</a>`:'—'}</td></tr>`;
+      }
+      h+=`</tbody></table></div>`;
+      document.getElementById('body').innerHTML=h;
+      applyFilter('criativos');
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+
+    // LP: Malu (malu-ads-c) = campanhas [MALU]; Hire (hire-ads-c) = [HIRE]. Funil por LP (estilo WICI2).
+    function lpAgg(rows, vdOverride){
+      let cost=0,imp=0,clk=0,pv=0,ic=0,vd=0;
+      for(const r of rows){ cost+=r.cost;imp+=r.impressions;clk+=r.clicks;pv+=r.pageview;ic+=r.ic;vd+=r.compras; }
+      if(vdOverride!=null) vd=vdOverride;            // vendas por página (regra da LP)
+      else { const t=viewTarget(rows); if(t!=null) vd=t; }   // total: planilha
+      return { investido:cost, imp, cliques:clk, pv, ic, vendas:vd, ctr:div(clk,imp)*100, connect:connectAgg(rows),
+        tx_checkout:div(ic,pv)*100, tx_venda:div(vd,ic)*100, conv:div(vd,clk)*100, cpa:div(cost,vd) };
+    }
+    // Vendas por página. Base = POPUPS de ads por página (colunas da planilha
+    // MÉTRICAS), que é a distribuição real. A página C de cada perfil absorve a
+    // diferença até o total do perfil (planilha). A Malu A não tem coluna de popup
+    // → o peso dela vem direto da fonte de dados (compras do Meta).
+    function pageVendas(lps){
+      // Vendas ADS por página. Peso = popup da página (colunas MÉTRICAS). Distribui o
+      // total do perfil (planilha) pelos pesos; páginas sem popup (ex.: 9,90, direto
+      // pro checkout) caem pro nº de compras do Meta. Soma = total da planilha.
+      const out={};
+      const W={ 'LP Malu A':cumInRange('pMaluA'), 'LP Malu B':cumInRange('pMaluB'), 'LP Malu C':cumInRange('pMaluC'),
+                'LP Hire A':cumInRange('pHireA') };
+      for(const perfil of ['Malu','Hire']){
+        const pref='LP '+perfil+' ';
+        const pages=lps.filter(l=>l.nome.indexOf(pref)===0);
+        if(!pages.length) continue;
+        const prows=(perfil==='Malu'?DATA.malu:DATA.hire).filter(r=>inRange(r.date));
+        const target=viewTarget(prows);
+        if(target==null){ for(const lp of pages) out[lp.nome]=lp.rows.reduce((s,r)=>s+r.compras,0); continue; }
+        const raw=pages.map(lp=>(W[lp.nome]!=null?W[lp.nome]:0));
+        const base = raw.some(v=>v>0) ? raw : pages.map(lp=>lp.rows.reduce((s,r)=>s+r.compras,0));
+        const dist=distribute(base, Math.round(target));
+        pages.forEach((lp,i)=>out[lp.nome]=dist[i]);
+      }
+      return out;
+    }
+    function lpDaily(rows){
+      const map={}, adsD=adsByDay(rows);
+      for(const r of rows){ const k=dkey(r.date); const o=map[k]||(map[k]={clk:0,pv:0,ic:0,vd:0,imp:0}); o.clk+=r.clicks;o.pv+=r.pageview;o.ic+=r.ic;o.imp+=r.impressions; }
+      for(const k in map) map[k].vd = adsD[k]||0;   // vendas/dia da planilha
+      const keys=Object.keys(map).sort();
+      return { labels:keys.map(k=>{const p=k.split('-');return p[2]+'/'+p[1];}),
+        connect:keys.map(k=>{const o=map[k];return (o.clk&&o.pv>0)?+(o.pv/o.clk*100).toFixed(2):null;}),
+        checkout:keys.map(k=>{const o=map[k];return o.pv?+(o.ic/o.pv*100).toFixed(2):null;}),
+        txconv:keys.map(k=>{const o=map[k];return o.ic?+(o.vd/o.ic*100).toFixed(2):null;}),
+        txconvpv:keys.map(k=>{const o=map[k];return o.pv?+(o.vd/o.pv*100).toFixed(2):null;}) };
+    }
+    function lpLine(cid, labels, data, color){
+      const el=document.getElementById(cid); if(!el) return;
+      charts.push(new Chart(el,{ type:'line',
+        data:{ labels, datasets:[{ data, borderColor:color, backgroundColor:color+'22', borderWidth:2, pointRadius:2, pointBackgroundColor:color, tension:.3, spanGaps:true, fill:true }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+PCT(c.parsed.y)}}},
+          scales:{ x:{grid:{color:'#ffffff08'},ticks:{color:'#9a8bb0',font:{size:9},maxTicksLimit:8}}, y:{grid:{color:'#ffffff08'},ticks:{color:'#9a8bb0',font:{size:9},callback:v=>Math.round(v)+'%'},beginAtZero:true} } }
+      }));
+    }
+    function renderLP(){
+      killCharts();
+      // Uma LP por PÁGINA (não por perfil): a página vem do sufixo da campanha.
+      // Só entra página que teve investimento no período — senão a tela enche de
+      // funil vazio de página que ainda não subiu campanha.
+      const _byPage={};
+      for(const [perfil,src] of [['Malu',DATA.malu],['Hire',DATA.hire]]){
+        for(const r of src){ if(!inRange(r.date)) continue;
+          const pg=campPage(r.campanha), k=perfil+'|'+pg;
+          (_byPage[k]=_byPage[k]||{nome:'LP '+perfil+' '+pg, url:lpUrl(perfil,pg), rows:[]}).rows.push(r);
+        }
+      }
+      const lps=Object.keys(_byPage).sort()
+        .map(k=>_byPage[k])
+        .filter(l=>l.rows.some(r=>r.cost>0));
+      if(!lps.length){ document.getElementById('body').innerHTML='<div class="empty">Sem dados no período</div>';
+        document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); return; }
+      // Soma TODAS as páginas. Era lps[0]+lps[1] fixo (de quando só existiam Malu
+      // e Hire) — com 3+ páginas isso silenciosamente deixava as demais de fora.
+      const _allRows=lps.reduce((a,l)=>a.concat(l.rows),[]);
+      const vendMap=pageVendas(lps);                              // venda por página
+      const g=lpAgg(_allRows);
+      g.vendas=Object.values(vendMap).reduce((a,b)=>a+b,0);       // GERAL = soma dos painéis
+      g.cpa=div(g.investido,g.vendas);
+      const _lbl='GERAL ('+lps.map(l=>l.nome.replace('LP ','')).join(' + ')+')';
+      let h=`<div class="lp-geral"><div class="lp-geral-lbl">${_lbl}</div><div class="lp-geral-stats">
+        <div><div class="lp-meta-lbl">Total Gasto</div><div class="lp-meta-val">${BRL(g.investido)}</div></div>
+        <div><div class="lp-meta-lbl">CPA Médio</div><div class="lp-meta-val">${g.vendas>0?BRL(g.cpa):'—'}</div></div>
+        <div><div class="lp-meta-lbl">Tx Conv PV→V</div><div class="lp-meta-val accent">${PCT(div(g.vendas,g.pv)*100)}</div></div>
+        <div><div class="lp-meta-lbl">Total Vendas</div><div class="lp-meta-val">${NUM(g.vendas)}</div></div>
+      </div></div><div class="lp-grid">`;
+      const jobs=[];
+      lps.forEach((lp,i)=>{ const a=lpAgg(lp.rows, vendMap[lp.nome]), d=lpDaily(lp.rows);
+        const steps=[
+          {n:'IMPRESSÕES', v:a.imp, wt:100, wb:86, rate:'CTR '+PCT(a.ctr)},
+          {n:'CLIQUES NO LINK', v:a.cliques, wt:80, wb:66, rate:'CONNECT '+PCT(a.connect)},
+          {n:'PAGE VIEW', v:a.pv, wt:60, wb:46, rate:'CHECKOUT '+PCT(a.tx_checkout)},
+          {n:'CHECKOUT', v:a.ic, wt:40, wb:30, rate:'TX CONV '+PCT(a.tx_venda)},
+          {n:'VENDAS ADS', v:a.vendas, wt:26, wb:20, rate:''},
+        ];
+        let fn='<div class="fn">';
+        for(let si=0;si<steps.length;si++){ const s=steps[si]; const tl=(100-s.wt)/2,tr=(100+s.wt)/2,br=(100+s.wb)/2,bl=(100-s.wb)/2; const L=34+si*8;
+          fn+=`<div class="fn-seg" style="clip-path:polygon(${tl}% 0,${tr}% 0,${br}% 100%,${bl}% 100%);background:linear-gradient(180deg,hsla(285,52%,${L}%,.92),hsla(285,52%,${L-7}%,.86))"><div class="fn-lbl">${s.n}</div><div class="fn-val">${NUM(s.v)}</div></div>`;
+          if(s.rate) fn+=`<div class="fn-rate"><span class="fn-pill">${s.rate}</span></div>`;
+        }
+        fn+='</div>';
+        h+=`<div class="lp-panel"><div class="lp-header"><div class="lp-header-left"><div class="lp-header-name">${lp.nome}</div><a class="lp-header-url" href="${lp.url}" target="_blank">${lp.url.replace('https://','')}</a></div>
+          <div class="lp-header-right">
+            <div><div class="lp-meta-lbl">Total Gasto</div><div class="lp-meta-val">${BRL(a.investido)}</div></div>
+            <div><div class="lp-meta-lbl">CPA</div><div class="lp-meta-val">${a.vendas>0?BRL(a.cpa):'—'}</div></div>
+            <div><div class="lp-meta-lbl">Tx Conv PV→V</div><div class="lp-meta-val accent">${PCT(div(a.vendas,a.pv)*100)}</div></div>
+          </div></div>
+          <div class="lp-body"><div class="lp-funnel-col">${fn}</div><div class="lp-charts-col">
+            <div class="lp-chart-card"><div class="lp-chart-title">Connect Rate</div><div class="lp-chart-h"><canvas id="lpA${i}"></canvas></div></div>
+            <div class="lp-chart-card"><div class="lp-chart-title">Checkout Rate (PV→Checkout)</div><div class="lp-chart-h"><canvas id="lpB${i}"></canvas></div></div>
+            <div class="lp-chart-card"><div class="lp-chart-title">Taxa Conversão (Checkout→Vendas)</div><div class="lp-chart-h"><canvas id="lpC${i}"></canvas></div></div>
+            <div class="lp-chart-card"><div class="lp-chart-title">Taxa Conversão (PV→Vendas)</div><div class="lp-chart-h"><canvas id="lpD${i}"></canvas></div></div>
+          </div></div></div>`;
+        jobs.push({i,d});
+      });
+      h+=`</div>`;
+      document.getElementById('body').innerHTML=h;
+      jobs.forEach(({i,d})=>{ lpLine('lpA'+i,d.labels,d.connect,'#c07be0'); lpLine('lpB'+i,d.labels,d.checkout,'#e0a75e'); lpLine('lpC'+i,d.labels,d.txconv,'#a855c8'); lpLine('lpD'+i,d.labels,d.txconvpv,'#8b7bef'); });
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+
+    // ── VENDAS (Mentoria Malu) — funil de e-commerce ────────────────────────────
+    function vAgg(rows){
+      const a={inv:0,imp:0,clk:0,vis:0,cart:0,valcart:0,chk:0,vendas:0,fat:0};
+      for(const r of rows){ a.inv+=r.inv;a.imp+=r.imp;a.clk+=r.clk;a.vis+=r.vis;a.cart+=r.cart;a.valcart+=r.valcart;a.chk+=r.chk;a.vendas+=r.vendas;a.fat+=r.fat; }
+      a.ctr=div(a.clk,a.imp)*100;
+      a.cpa=div(a.inv,a.vendas);
+      a.roas=div(a.fat,a.inv);
+      a.ticket=div(a.fat,a.vendas);
+      a.cpv=div(a.inv,a.vis);              // custo por visita ao site
+      a.txvenda=div(a.vendas,a.chk)*100;   // checkout → venda
+      return a;
+    }
+    function setVendasGroup(el){ document.querySelectorAll('.vgbtn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); vendasGroup=el.dataset.g; renderVendas(); }
+    function renderVendas(){
+      killCharts();
+      const upd=()=>{ const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
+      // A aba Vendas NÃO esconde o dia atual: gasto E venda vêm na MESMA linha da
+      // planilha "Vendas" (sem o lag que estoura o CPA nas abas do workshop, onde a
+      // venda é lançada depois na MÉTRICAS). Por isso não aplica o teto d>ontem().
+      const inRangeV = d => (!fStart||d>=fStart) && (!fEnd||d<=fEnd) && d>=cutoff();
+      const rows=(DATA.vendas||[]).filter(r=>inRangeV(r.date));
+      if(!rows.length){ document.getElementById('body').innerHTML='<div class="empty">Sem dados de vendas no período</div>'; upd(); return; }
+      const g=vAgg(rows);
+      const cot=(DATA.metas&&DATA.metas.cotacao)||5.19;   // Investimento vem em US$ (conta Meta)
+      const camps=[...new Set(rows.map(r=>r.campanha))].filter(x=>x&&x!=='—');
+      // Funil
+      const steps=[
+        {n:'IMPRESSÕES',          v:g.imp,    wt:100, wb:84, rate:'CTR '+PCT(g.ctr)},
+        {n:'CLIQUES NO LINK',     v:g.clk,    wt:84,  wb:66, rate:'VISITA '+PCT(div(g.vis,g.clk)*100)},
+        {n:'VISITAS NO SITE',     v:g.vis,    wt:64,  wb:50, rate:'ADD CARRINHO '+PCT(div(g.cart,g.vis)*100)},
+        {n:'ADIÇÕES AO CARRINHO', v:g.cart,   wt:48,  wb:36, rate:'CHECKOUT '+PCT(div(g.chk,g.cart)*100)},
+        {n:'CHECKOUT',            v:g.chk,    wt:34,  wb:24, rate:'TX CONVERSÃO '+PCT(g.txvenda)},
+        {n:'VENDAS',              v:g.vendas, wt:22,  wb:16, rate:''},
+      ];
+      let fn='<div class="fn">';
+      for(let si=0;si<steps.length;si++){ const s=steps[si]; const tl=(100-s.wt)/2,tr=(100+s.wt)/2,br=(100+s.wb)/2,bl=(100-s.wb)/2; const L=34+si*7;
+        fn+=`<div class="fn-seg" style="clip-path:polygon(${tl}% 0,${tr}% 0,${br}% 100%,${bl}% 100%);background:linear-gradient(180deg,hsla(285,52%,${L}%,.92),hsla(285,52%,${L-7}%,.86))"><div class="fn-lbl">${s.n}</div><div class="fn-val">${NUM(s.v)}</div></div>`;
+        if(s.rate) fn+=`<div class="fn-rate"><span class="fn-pill">${s.rate}</span></div>`;
+      }
+      fn+='</div>';
+      // Header GERAL (KPIs de dinheiro)
+      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA MALU · Vendas${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Investido convertido US$ → R$ (× ${cot.toLocaleString('pt-BR',{minimumFractionDigits:2})}) · Faturamento já em R$</div></div><div class="lp-geral-stats">
+        <div><div class="lp-meta-lbl">Investido</div><div class="lp-meta-val">${BRL(g.inv)}</div></div>
+        <div><div class="lp-meta-lbl">Vendas</div><div class="lp-meta-val">${NUM(g.vendas)}</div></div>
+        <div><div class="lp-meta-lbl">Faturamento</div><div class="lp-meta-val">${g.vendas>0?BRL(g.fat):'—'}</div></div>
+        <div><div class="lp-meta-lbl">CPA</div><div class="lp-meta-val">${g.vendas>0?BRL(g.cpa):'—'}</div></div>
+        <div><div class="lp-meta-lbl">ROAS</div><div class="lp-meta-val accent">${g.vendas>0?RS(g.roas):'—'}</div></div>
+        <div><div class="lp-meta-lbl">Ticket Médio</div><div class="lp-meta-val">${g.vendas>0?BRL(g.ticket):'—'}</div></div>
+      </div></div>`;
+      // Painel do funil
+      h+=`<div class="lp-panel"><div class="lp-header"><div class="lp-header-left"><div class="lp-header-name">Funil de Vendas — Mentoria Malu</div></div>
+        <div class="lp-header-right"><div><div class="lp-meta-lbl">Custo por visita</div><div class="lp-meta-val">${g.vis?BRL(g.cpv):'—'}</div></div></div></div>
+        <div style="max-width:540px;margin:8px auto 0">${fn}</div></div>`;
+      // Tabela por grupo (Criativo / Campanha / Público)
+      const keyf = vendasGroup==='campanha'? r=>r.campanha : vendasGroup==='publico'? r=>r.publico : r=>r.criativo;
+      const glabel = vendasGroup==='campanha'?'Campanha':vendasGroup==='publico'?'Público':'Criativo';
+      const by={};
+      for(const r of rows){ const k=keyf(r)||'—'; const o=by[k]||(by[k]={k, link:'', _rows:[]}); if(!o.link&&r.link)o.link=r.link; o._rows.push(r); }
+      let list=Object.values(by).map(o=>Object.assign({k:o.k, link:o.link}, vAgg(o._rows)));
+      list=sortRows('vendas', list, 'inv');
+      const gb=(gg,lbl)=>`<button class="vgbtn${vendasGroup===gg?' active':''}" data-g="${gg}" onclick="setVendasGroup(this)">${lbl}</button>`;
+      h+=`<div class="lbl">Detalhe por ${glabel} (${list.length})</div>
+        <div class="vgsel">${gb('criativo','Criativo')}${gb('campanha','Campanha')}${gb('publico','Público')}</div>
+        <div class="twrap"><table><thead><tr>
+        ${sortTh('vendas','k',glabel,1)}<th>Status</th>${sortTh('vendas','inv','Investido')}${sortTh('vendas','imp','Impr.')}${sortTh('vendas','ctr','CTR')}${sortTh('vendas','clk','Cliques')}${sortTh('vendas','vis','Visitas')}${sortTh('vendas','cart','Add Cart')}${sortTh('vendas','chk','Checkout')}${sortTh('vendas','vendas','Vendas')}${sortTh('vendas','cpa','CPA')}${sortTh('vendas','fat','Fat.')}${sortTh('vendas','roas','ROAS')}<th>Link</th>
+      </tr></thead><tbody>`;
+      const vtype='v'+vendasGroup;   // namespace de status próprio da aba Vendas (não colide c/ workshop)
+      for(const o of list){
+        h+=`<tr><td title="${o.k}">${o.k}</td><td>${stBadgeClk(vtype,o.k,'ACTIVE')}</td><td>${BRL(o.inv)}</td><td>${NUM(o.imp)}</td><td>${PCT(o.ctr)}</td><td>${NUM(o.clk)}</td><td>${NUM(o.vis)}</td><td>${NUM(o.cart)}</td><td>${NUM(o.chk)}</td><td>${NUM(o.vendas)}</td><td>${o.vendas>0?BRL(o.cpa):'—'}</td><td>${o.vendas>0?BRL(o.fat):'—'}</td><td>${o.vendas>0?RS(o.roas):'—'}</td><td>${o.link?`<a class="vlink" href="${o.link}" target="_blank">abrir</a>`:'—'}</td></tr>`;
+      }
+      h+=`</tbody></table></div>`;
+      document.getElementById('body').innerHTML=h;
+      upd();
+    }
+
+    // ── Aba WHATS: campanhas de mentoria por WhatsApp (já estão na Malu/Hire Meta) ──
+    function renderWhats(){
+      killCharts();
+      const upd=()=>{ const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
+      const inRangeW = d => (!fStart||d>=fStart) && (!fEnd||d<=fEnd) && d>=cutoff();
+      const rows=DATA.malu.concat(DATA.hire).filter(r=>inRangeW(r.date) && /WHATSAPP/i.test(r.campanha||''));
+      if(!rows.length){ document.getElementById('body').innerHTML='<div class="empty">Sem dados de WhatsApp no período</div>'; upd(); return; }
+      const S=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
+      const inv=S('cost'), imp=S('impressions'), reach=S('reach'), clk=S('clicks');
+      const ctr=div(clk,imp)*100, cpm=div(inv,imp)*1000, cpc=div(inv,clk);
+      const camps=[...new Set(rows.map(r=>r.campanha))].filter(x=>x&&x!=='—');
+      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA · WHATSAPP${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Mentoria vendida por WhatsApp · investido já em R$ · a venda fecha no Clint (não é rastreada por campanha, por isso sem CPA/ROAS aqui)</div></div><div class="lp-geral-stats">
+        <div><div class="lp-meta-lbl">Investido</div><div class="lp-meta-val">${BRL(inv)}</div></div>
+        <div><div class="lp-meta-lbl">Impressões</div><div class="lp-meta-val">${NUM(imp)}</div></div>
+        <div><div class="lp-meta-lbl">Alcance</div><div class="lp-meta-val">${NUM(reach)}</div></div>
+        <div><div class="lp-meta-lbl">Cliques</div><div class="lp-meta-val">${NUM(clk)}</div></div>
+        <div><div class="lp-meta-lbl">CTR</div><div class="lp-meta-val">${PCT(ctr)}</div></div>
+        <div><div class="lp-meta-lbl">CPM</div><div class="lp-meta-val">${BRL(cpm)}</div></div>
+      </div></div>`;
+      // Detalhe por criativo
+      const by={};
+      for(const r of rows){ const k=r.anuncio||'—'; const o=by[k]||(by[k]={k, camp:r.campanha, link:'', inv:0, imp:0, clk:0}); o.inv+=(r.cost||0); o.imp+=(r.impressions||0); o.clk+=(r.clicks||0); if(!o.link&&r.link)o.link=r.link; }
+      let list=Object.values(by).map(o=>Object.assign(o,{ctr:div(o.clk,o.imp)*100, cpc:div(o.inv,o.clk)})).sort((a,b)=>b.inv-a.inv);
+      h+=`<div class="lbl">Criativos (${list.length})</div><div class="twrap"><table><thead><tr>
+        <th style="text-align:left">Criativo</th><th style="text-align:left">Campanha</th><th>Investido</th><th>Impr.</th><th>CTR</th><th>Cliques</th><th>CPC</th><th>Link</th>
+      </tr></thead><tbody>`;
+      for(const o of list){
+        h+=`<tr><td title="${o.k}">${o.k}</td><td title="${o.camp}">${o.camp}</td><td>${BRL(o.inv)}</td><td>${NUM(o.imp)}</td><td>${PCT(o.ctr)}</td><td>${NUM(o.clk)}</td><td>${o.clk?BRL(o.cpc):'—'}</td><td>${o.link?`<a class="vlink" href="${o.link}" target="_blank">abrir</a>`:'—'}</td></tr>`;
+      }
+      h+=`</tbody></table></div>`;
+      document.getElementById('body').innerHTML=h;
+      upd();
+    }
+
+    async function loadAll(){
+      document.getElementById('body').innerHTML='<div class="loading">Carregando dados da planilha…</div>';
+      try{
+        const UTMQ="gid=0&tq="+encodeURIComponent("select * where A >= date '2026-10-23'");
+        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas]=await Promise.all([
+          gviz(FONTE,'sheet='+encodeURIComponent('Malu Meta')),
+          gviz(FONTE,'sheet='+encodeURIComponent('Hire Meta')),
+          gviz(FONTE,'sheet='+encodeURIComponent('Metas')).catch(()=>null),
+          (UTM_MALU?gviz(UTM_MALU,UTMQ):Promise.resolve(null)).catch(()=>null),
+          (UTM_HIRE?gviz(UTM_HIRE,UTMQ):Promise.resolve(null)).catch(()=>null),
+          gviz(ADS_WB,'gid='+GID_METRICAS).catch(()=>null),
+          gviz(FONTE,'sheet='+encodeURIComponent('Vendas')).catch(()=>null),
+        ]);
+        DATA.malu=metaRows(tMalu); DATA.hire=metaRows(tHire);
+        DATA.umalu=tuMalu?utmRows(tuMalu):[]; DATA.uhire=tuHire?utmRows(tuHire):[];
+        DATA.metas=tMetas?readMetas(tMetas):{...METAS_DEFAULT};
+        DATA.metricas=tMetr?metricasParse(tMetr):null;
+        DATA.vendas=tVendas?vendaRows(tVendas):[];
+        // Cost vem em US$ (conta do Meta) → converte p/ R$ pela cotação (aba Metas ou 5,19)
+        const cot = DATA.metas.cotacao || 5.19;
+        DATA.malu.forEach(r=>{ r.cost *= cot; });
+        DATA.hire.forEach(r=>{ r.cost *= cot; });
+        // Só o Investimento é US$ (Meta); Faturamento/Valor Carrinho já vêm em R$ (checkout).
+        DATA.vendas.forEach(r=>{ r.inv *= cot; });
+        await loadOverrides();     // overrides manuais de status (servidor) antes de renderizar
+        route();
+        const _hp=(location.hash||'').replace('#','');   // abre a aba do #hash (deep-link)
+        if(_hp){ const _tb=document.querySelector('.tab[data-p="'+_hp+'"]'); if(_tb) setTab(_tb); }
+      }catch(e){
+        document.getElementById('body').innerHTML='<div class="empty err">Erro ao carregar: '+e.message+'</div>';
+      }
+    }
+    loadAll();
+  </script>
+</body>
+</html>
