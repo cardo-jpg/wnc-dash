@@ -65,12 +65,12 @@
   .tab.active{ color:var(--accent); border-bottom-color:var(--accent); background:linear-gradient(var(--accent-soft),transparent); box-shadow:0 1px 12px var(--accent-glow); }
 
   /* Section label */
-  .lbl{ display:flex; align-items:center; gap:10px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:36px 0 16px; }
+  .lbl{ display:flex; align-items:center; gap:10px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:28px 0 14px; }
   .lbl::before{ content:''; width:4px; height:15px; border-radius:2px; background:linear-gradient(var(--accent),var(--accent-2)); box-shadow:0 0 10px var(--accent-glow); }
 
   /* Gauges */
   .gauges{ display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:14px; margin-bottom:12px; }
-  .gauge-card{ background:linear-gradient(165deg, rgba(146,112,232,.14), var(--panel) 60%); border:1px solid var(--border); border-radius:18px; padding:24px 20px 20px; display:flex; flex-direction:column; align-items:center; box-shadow:0 8px 32px rgba(0,0,0,.3); transition:border-color .15s, transform .15s; }
+  .gauge-card{ background:linear-gradient(165deg, rgba(146,112,232,.14), var(--panel) 60%); border:1px solid var(--border); border-radius:18px; padding:22px 16px 18px; display:flex; flex-direction:column; align-items:center; box-shadow:0 8px 32px rgba(0,0,0,.3); transition:border-color .15s, transform .15s; }
   .gauge-card:hover{ border-color:var(--accent-line); transform:translateY(-2px); }
   .gauge-title{ font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
   .gauge-sub{ font-size:.72rem; color:var(--accent); margin-bottom:4px; letter-spacing:.02em; }
@@ -80,22 +80,22 @@
   .gauge-fill{ fill:none; stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset .6s ease; }
   .gauge-pct{ position:absolute; left:0; right:0; top:54%; transform:translateY(-50%); text-align:center; font-family:var(--disp); font-size:2.6rem; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; text-shadow:0 2px 16px var(--accent-glow); }
   .gauge-leg{ font-size:11px; font-weight:600; font-family:var(--disp); }
-  .gauge-stats{ display:flex; gap:16px; margin-top:8px; }
-  .gauge-stat{ text-align:center; }
-  .gauge-stat-l{ font-size:.68rem; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; }
-  .gauge-stat-v{ font-family:var(--disp); font-size:1.24rem; font-weight:600; margin-top:3px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .gauge-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; width:100%; }
+  .gauge-stat{ text-align:center; min-width:0; }
+  .gauge-stat-l{ font-size:.66rem; color:var(--faint); text-transform:uppercase; letter-spacing:.04em; }
+  .gauge-stat-v{ font-family:var(--disp); font-size:1.06rem; font-weight:600; margin-top:3px; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .gauge-stat-v.pc-ok{ color:var(--good); }
   .gauge-stat-v.pc-bad{ color:var(--bad); }
 
   /* Cards */
-  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:13px; }
-  .card{ background:linear-gradient(165deg, rgba(146,112,232,.07), var(--panel) 62%); border:1px solid var(--border); border-radius:15px; padding:18px 20px; min-height:124px; display:flex; flex-direction:column; justify-content:center; box-shadow:0 4px 20px rgba(0,0,0,.22); transition:transform .14s, border-color .14s; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:13px; }
+  .card{ background:linear-gradient(165deg, rgba(146,112,232,.07), var(--panel) 62%); border:1px solid var(--border); border-radius:15px; padding:18px; min-height:120px; display:flex; flex-direction:column; justify-content:center; box-shadow:0 4px 20px rgba(0,0,0,.22); transition:transform .14s, border-color .14s; }
   .card:hover{ transform:translateY(-3px); border-color:var(--accent-line); }
   .card.hl{ background:linear-gradient(155deg, rgba(146,112,232,.28), rgba(107,75,184,.14) 70%, var(--panel)); border-color:var(--accent-line); box-shadow:0 8px 30px var(--accent-glow); }
   .card .k{ font-size:.76rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
   .card.hl .k{ color:#e6dcff; }
   .card .prev{ font-size:.74rem; color:var(--faint); margin-top:4px; }
-  .card .v{ font-family:var(--disp); font-size:1.98rem; font-weight:600; margin-top:11px; line-height:1.02; white-space:nowrap; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  .card .v{ font-family:var(--disp); font-size:1.76rem; font-weight:600; margin-top:10px; line-height:1.04; white-space:nowrap; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
   .card .v.accent{ color:var(--accent); } .card .v.good{ color:var(--good); }
   .card.hl .v{ color:#fff; text-shadow:0 2px 14px var(--accent-glow); }
   .card .tax{ font-size:.74rem; color:var(--muted); margin-top:7px; }
@@ -105,7 +105,7 @@
   .charts3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
   @media(max-width:1000px){ .charts3{ grid-template-columns:1fr; } }
   @media(max-width:900px){ .charts2{ grid-template-columns:1fr; } .gauges{ grid-template-columns:1fr 1fr; } }
-  @media(max-width:560px){ .gauges{ grid-template-columns:1fr; } }
+  @media(max-width:560px){ .gauges{ grid-template-columns:1fr; } .page{ padding:18px 14px 60px; } .lbl{ margin:24px 0 12px; } .card .v{ font-size:1.9rem; } }
   .chart-card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; }
   .chart-title{ font-size:.74rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px; }
   .chart-box{ position:relative; }
