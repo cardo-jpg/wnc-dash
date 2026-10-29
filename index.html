@@ -637,7 +637,9 @@
         ? launchRows.reduce((s,r)=> r.date<=_lastSale ? s+r.cost : s, 0)
         : k.investido;
       const cpaReal = div(investidoCPA, vAds);
-      const _cpaTxt = _lastSale ? ('gasto × vendas até '+String(_lastSale.getDate()).padStart(2,'0')+'/'+String(_lastSale.getMonth()+1).padStart(2,'0')) : '';
+      const _ddSale = _lastSale ? String(_lastSale.getDate()).padStart(2,'0')+'/'+String(_lastSale.getMonth()+1).padStart(2,'0') : '';
+      const _cpaTxt = _lastSale ? (BRLk(investidoCPA)+' ÷ '+NUM(vAds)+' · até '+_ddSale) : '';
+      const _hojeGasto = Math.max(0, k.investido - investidoCPA);   // gasto de hoje, ainda sem venda lançada
       let h='';
       h+=`<div class="gauges">`;
       h+=gauge('g1','Vendas Tráfego', vAds, metaTraf, NUM, NUM(rAds), NUM(Math.round(metaTraf/daysTotal)), paceOf(vAds,metaTraf,rAds));
@@ -657,7 +659,7 @@
 
       // ── 1) Tráfego · Ads (Meta Ads) ──
       h+=`<div class="lbl">Tráfego · Ads (Meta Ads)</div><div class="grid">`;
-      h+=card('Investimento Total', BRL(k.investido), 'hl v', 'Previsto: '+BRLk(m.investimento), 'Taxa investida '+PCT(div(k.investido,m.investimento)*100))
+      h+=card('Investimento Total', BRL(k.investido), 'hl v', 'Previsto: '+BRLk(m.investimento), _hojeGasto>0?('inclui '+BRLk(_hojeGasto)+' de hoje · fora do CPA'):('Taxa investida '+PCT(div(k.investido,m.investimento)*100)))
         +card('Vendas Ads', NUM(vAds), 'accent', mc?'Fonte: planilha':'')
         +(mc?card('START ADS', NUM(cumInRange('startAds'))):'')
         +(mc?card('VIP ADS', NUM(cumInRange('vipAds'))):'')
