@@ -260,11 +260,14 @@
     const UTM_MALU   = '';   // planilha de UTMs por lead (Malu) — a definir no novo lançamento
     const UTM_HIRE   = '';   // planilha de UTMs por lead (Hire) — a definir no novo lançamento
     const SHEET_PESQUISA_ID = '1kQYVgEw6G1aHse-LVZzpIA3XT7UHDJEuKvLNJ01c880';  // credenciamento (confirmar se é a mesma do WNC)
-    const START = new Date(2026, 9, 23);          // 23/10/2026 — início do acompanhamento
+    const START = new Date(2026, 9, 23);          // 23/10/2026 — início do acompanhamento (base antiga/stories)
+    const CAMP_START = new Date(2026, 9, 26);     // 26/10/2026 — início REAL da campanha (vendas geral + tráfego); base dos 25 dias
     const FLOOR = new Date(2026, 0, 1);
-    const EVENT = new Date(2026, 10, 21);         // 21/11/2026 — workshop (p/ meta/dia e pacing)
-    const METAS_DEFAULT = { leads:2000, investimento:132000, cpa:80, cpm:25, ctr:0.80, connect_rate:82,
-      cotacao:5.20, data_inicio:'23/10/2026', data_evento:'21 e 22/11' };
+    const EVENT = new Date(2026, 10, 21);         // 21/11/2026 — workshop
+    // leads=2000 (TOTAL) = ads 1500 + org 500 · dias_campanha=25 (NÃO 30) · da aba Metas
+    const METAS_DEFAULT = { leads:2000, ads:1500, org:500, split:75, dias_campanha:25,
+      investimento:132000, cpa:80, cpm:25, ctr:0.80, connect_rate:82,
+      cotacao:5.20, data_inicio:'26/10/2026', data_evento:'21 e 22/11' };
 
     let DATA = { malu:[], hire:[], umalu:[], uhire:[], metas:{...METAS_DEFAULT}, metricas:null, vendas:[] };
     let profile = 'geral', presetDays = 'all';
@@ -358,7 +361,11 @@
       for(const r of rows){
         const k=(r[0]||'').toString().trim().toLowerCase(); const v=r[1]!=null?r[1]:'';
         if(k.includes('leads')){ if(parseBR(v))m.leads=parseBR(v); }
-        else if(k.includes('investimento')){ if(parseBR(v))m.investimento=parseBR(v); if(r[4])m.data_inicio=String(r[4]).trim(); if(r[8])m.data_evento=String(r[8]).trim(); }
+        else if(k.includes('dias') && k.includes('campanha')){ if(parseBR(v))m.dias_campanha=parseBR(v); }
+        else if(k.includes('split')){ if(parseBR(v))m.split=parseBR(v); }
+        else if(k==='org'){ if(parseBR(v))m.org=parseBR(v); }          // meta orgânica (500) — exato, p/ não pegar "org por dia"
+        else if(k==='ads'){ if(parseBR(v))m.ads=parseBR(v); }          // meta de tráfego (1.500)
+        else if(k.includes('investimento')){ if(parseBR(v))m.investimento=parseBR(v); }
         else if(k==='cpa'){ if(parseBR(v))m.cpa=parseBR(v); }
         else if(k==='cpm'){ if(parseBR(v))m.cpm=parseBR(v); }
         else if(k==='ctr'){ if(parseBR(v))m.ctr=parseBR(v); }
@@ -577,16 +584,17 @@
       const k=metaAgg(launchRows), m=DATA.metas;
       const leads=urows.length;
 
-      // dias
+      // dias — pacing é pela CAMPANHA (25 dias desde 26/10), não pela janela da planilha.
       const today=new Date(); today.setHours(0,0,0,0);
-      const daysElapsed=Math.max(1, Math.round((today-START)/864e5)+1);
-      const daysTotal=Math.max(1, Math.round((EVENT-START)/864e5)+1);
+      const diasCamp=Math.max(1, Math.round(m.dias_campanha)||25);      // da aba Metas
+      const CAMP_END=new Date(CAMP_START.getTime()+(diasCamp-1)*864e5); // 26/10 + 24d = 19/11
+      const daysTotal=diasCamp;                                         // meta/dia = total ÷ 25
       const cpl=div(k.investido,leads);
 
       const mc = DATA.metricas && DATA.metricas.latest;
-      const metaIng  = mc ? mc.meta : 2000;              // meta total de ingressos
-      const metaTraf = m.leads || 1170;                  // "Trafego meta leads" (aba Metas)
-      const metaOrg  = Math.max(0, metaIng - metaTraf);  // 1.800 − 1.170 = 630
+      const metaIng  = m.leads || 2000;                                 // meta TOTAL de leads (aba Metas)
+      const metaTraf = m.ads   || Math.round(metaIng*((m.split||75)/100)); // meta de tráfego = 1.500
+      const metaOrg  = (m.org!=null) ? m.org : Math.max(0, metaIng - metaTraf); // meta orgânica = 500
       // Orgânico e total somam os valores DIÁRIOS dentro do filtro (antes liam o
       // acumulado da última linha e ignoravam o período escolhido).
       const orgSales = mc ? cumInRange('org') : 0;
@@ -601,7 +609,8 @@
       // Pace real: quanto FALTA ÷ dias que restam até o evento. A "meta/dia" é o
       // ritmo teórico calculado desde o dia 1 e não se corrige conforme atrasamos;
       // este é o número acionável — o ritmo necessário de amanhã em diante.
-      const diasRest=Math.max(1, Math.round((EVENT-today)/864e5));
+      const diasRest=Math.max(1, Math.round((CAMP_END-today)/864e5)+1);  // dias de campanha que ainda restam (hoje incluso)
+      const _fimTxt=String(CAMP_END.getDate()).padStart(2,'0')+'/'+String(CAMP_END.getMonth()+1).padStart(2,'0');
       function paceOf(atual, meta, ritmoAtual, f, okTxt){
         if(!meta) return null;
         f = f || NUM;
@@ -611,13 +620,24 @@
         // Verde quando o ritmo já alcançado dá conta; vermelho quando é preciso acelerar.
         const cls = ritmoAtual>=need ? 'pc-ok' : 'pc-bad';
         return { txt:f(need), cls,
-          tip:f(falta)+' restantes ÷ '+diasRest+' dias até 21/11 · ritmo atual '+f(ritmoAtual)+'/dia' };
+          tip:f(falta)+' restantes ÷ '+diasRest+' dias de campanha até '+_fimTxt+' · ritmo atual '+f(ritmoAtual)+'/dia' };
       }
       const rAds=Math.round(vAds/ddAds), rOrg=Math.round(orgSales/ddTot), rTot=Math.round(ingressos/ddTot);
       // Investimento: dias decorridos desde o início do TRÁFEGO (o gasto começou lá),
       // não desde o início da planilha — senão a média/dia sai diluída.
       const rInv=k.investido/Math.max(1,ddAds);
       const _disp=Math.max(0, m.investimento-k.investido);
+      // CPA honesto: as vendas da planilha só vão até ONTEM (o dia fecha no dia
+      // seguinte), mas o gasto é puxado de hora em hora e já inclui HOJE. Casar os
+      // dois dá CPA errado (gasto de hoje ÷ vendas de ontem). Então o CPA usa só o
+      // gasto até o último dia que TEM venda lançada. O card de Investimento abaixo
+      // segue mostrando o gasto total (inclui hoje) — lá o teto é o dia corrente.
+      const _lastSale = _ser.length ? _ser[_ser.length-1].date : null;
+      const investidoCPA = _lastSale
+        ? launchRows.reduce((s,r)=> r.date<=_lastSale ? s+r.cost : s, 0)
+        : k.investido;
+      const cpaReal = div(investidoCPA, vAds);
+      const _cpaTxt = _lastSale ? ('gasto × vendas até '+String(_lastSale.getDate()).padStart(2,'0')+'/'+String(_lastSale.getMonth()+1).padStart(2,'0')) : '';
       let h='';
       h+=`<div class="gauges">`;
       h+=gauge('g1','Vendas Tráfego', vAds, metaTraf, NUM, NUM(rAds), NUM(Math.round(metaTraf/daysTotal)), paceOf(vAds,metaTraf,rAds));
@@ -641,7 +661,7 @@
         +card('Vendas Ads', NUM(vAds), 'accent', mc?'Fonte: planilha':'')
         +(mc?card('START ADS', NUM(cumInRange('startAds'))):'')
         +(mc?card('VIP ADS', NUM(cumInRange('vipAds'))):'')
-        +card('CPA', vAds>0?BRL(k.cpa):'—')   // sem venda: '—', senão R$0,00 lê como CPA ótimo
+        +card('CPA', vAds>0?BRL(cpaReal):'—', '', _cpaTxt)   // casado: gasto do mesmo período das vendas
         +card('CTR', PCT(k.ctr));
       h+=`</div>`;
 
