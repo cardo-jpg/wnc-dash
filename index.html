@@ -659,11 +659,12 @@
 
       // ── 1) Tráfego · Ads (Meta Ads) ──
       h+=`<div class="lbl">Tráfego · Ads (Meta Ads)</div><div class="grid">`;
-      h+=card('Investimento Total', BRL(k.investido), 'hl v', 'Previsto: '+BRLk(m.investimento), _hojeGasto>0?('inclui '+BRLk(_hojeGasto)+' de hoje · fora do CPA'):('Taxa investida '+PCT(div(k.investido,m.investimento)*100)))
-        +card('Vendas Ads', NUM(vAds), 'accent', mc?'Fonte: planilha':'')
+      h+=card('Investido Total', BRL(k.investido), 'hl v', 'Previsto: '+BRLk(m.investimento), 'Taxa investida '+PCT(div(k.investido,m.investimento)*100))
+        +(_hojeGasto>0?card('Gasto de Hoje', BRL(_hojeGasto), '', 'parcial · ainda sem venda', 'não entra no CPA'):'')
+        +card('Vendas Ads', NUM(vAds), 'accent', mc?('Fonte: planilha'+(_ddSale?' · até '+_ddSale:'')):'')
         +(mc?card('START ADS', NUM(cumInRange('startAds'))):'')
         +(mc?card('VIP ADS', NUM(cumInRange('vipAds'))):'')
-        +card('CPA', vAds>0?BRL(cpaReal):'—', '', _cpaTxt)   // casado: gasto do mesmo período das vendas
+        +card('CPA', vAds>0?BRL(cpaReal):'—', 'hl v', _cpaTxt)   // casado: gasto fechado ÷ vendas do mesmo período
         +card('CTR', PCT(k.ctr));
       h+=`</div>`;
 
