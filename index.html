@@ -668,6 +668,31 @@
         +card('CTR', PCT(k.ctr));
       h+=`</div>`;
 
+      // ── 1b) Preço por temperatura (Quente × Frio) ─────────────────────────
+      // Maracutaia: a planilha da Maria NÃO marca quente/frio, mas as campanhas
+      // sim (_Q_ = quente · _F_ e 9,90 = frio). Pegamos o GASTO real de cada tipo
+      // e deduzimos as vendas de cada um rateando o total da MÉTRICAS pela
+      // proporção de COMPRAS que o Meta deu a cada tipo (metaAgg→viewTarget).
+      // Frio = tudo que não é quente (inclui o checkout 9,90 e a Hire, 100% fria).
+      if(mc && vAds>0){
+        const qRows = launchRows.filter(r=>campType(r.campanha)==='quente');
+        const fRows = launchRows.filter(r=>campType(r.campanha)!=='quente');
+        const qV=metaAgg(qRows).vendas, fV=Math.max(0, vAds-qV);   // somam o total exato
+        // Gasto casado com o CPA: só até o último dia COM venda lançada (igual cpaReal),
+        // pra o gasto de hoje (ainda sem venda na MÉTRICAS) não inflar o preço.
+        const sumTo = rr => _lastSale ? rr.reduce((s,r)=> r.date<=_lastSale ? s+r.cost : s, 0) : rr.reduce((s,r)=>s+r.cost,0);
+        const qSpend=sumTo(qRows), fSpend=sumTo(fRows);
+        const precoQ = qV>0 ? div(qSpend,qV) : 0;
+        const precoF = fV>0 ? div(fSpend,fV) : 0;
+        const shareQ = div(qV,vAds)*100;
+        h+=`<div class="lbl">Preço por Temperatura — Quente × Frio <span style="font-weight:400;color:var(--muted);font-size:.78rem">· vendas deduzidas pela proporção de compras do Meta</span></div><div class="grid">`;
+        h+=card('Preço Lead Quente', qV>0?BRL(precoQ):'—', 'hl v', 'Gasto '+BRLk(qSpend)+' ÷ '+NUM(qV)+' vendas', PCT(shareQ)+' das vendas')
+          +card('Preço Lead Frio', fV>0?BRL(precoF):'—', 'hl v', 'Gasto '+BRLk(fSpend)+' ÷ '+NUM(fV)+' vendas', PCT(100-shareQ)+' das vendas')
+          +card('Vendas Quente', NUM(qV), 'accent', 'rateado · campanhas _Q_')
+          +card('Vendas Frio', NUM(fV), 'accent', 'inclui 9,90 + Hire');
+        h+=`</div>`;
+      }
+
       // ── 2) Vendas Orgânicas ──
       if(mc){
         h+=`<div class="lbl">Vendas Orgânicas</div><div class="grid">`;
