@@ -676,16 +676,25 @@
       // Frio = tudo que não é quente (inclui o checkout 9,90 e a Hire, 100% fria).
       if(mc && vAds>0){
         const qRows = launchRows.filter(r=>campType(r.campanha)==='quente');
-        const fRows = launchRows.filter(r=>campType(r.campanha)!=='quente');
-        const qV=metaAgg(qRows).vendas, fV=Math.max(0, vAds-qV);   // somam o total exato
-        // Gasto casado com o CPA: só até o último dia COM venda lançada (igual cpaReal),
-        // pra o gasto de hoje (ainda sem venda na MÉTRICAS) não inflar o preço.
+        const fRows = launchRows.filter(r=>campType(r.campanha)!=='quente');  // frio = não-quente (o 9,90 entra no GASTO)
+        const sumC = rr => rr.reduce((s,r)=>s+r.compras,0);
+        // Proporção do rateio: GLOBAL e só entre START/VIP (quente _Q_ + frio _F_).
+        // O 9,90 é OUTRO produto — suas compras NÃO entram no denominador (senão
+        // encolhem o quente); só o GASTO dele fica no frio (escolha do José).
+        // Global = o nº de vendas quentes é o mesmo em toda aba (todo quente é Malu).
+        const allLaunch = DATA.malu.concat(DATA.hire).filter(r=>inRange(r.date) && r.bucket==='ingresso');
+        const GQc = sumC(allLaunch.filter(r=>campType(r.campanha)==='quente'));
+        const GFc = sumC(allLaunch.filter(r=>campType(r.campanha)==='frio'));
+        const GQv = (GQc+GFc)>0 ? Math.round(adsTarget()*GQc/(GQc+GFc)) : 0;  // vendas quentes no total
+        const qV = GQc>0 ? Math.round(GQv*sumC(qRows)/GQc) : 0;               // parte desta aba
+        const fV = Math.max(0, vAds-qV);
+        // Gasto casado com o CPA: só até o último dia COM venda lançada (igual cpaReal).
         const sumTo = rr => _lastSale ? rr.reduce((s,r)=> r.date<=_lastSale ? s+r.cost : s, 0) : rr.reduce((s,r)=>s+r.cost,0);
         const qSpend=sumTo(qRows), fSpend=sumTo(fRows);
         const precoQ = qV>0 ? div(qSpend,qV) : 0;
         const precoF = fV>0 ? div(fSpend,fV) : 0;
         const shareQ = div(qV,vAds)*100;
-        h+=`<div class="lbl">Preço por Temperatura — Quente × Frio <span style="font-weight:400;color:var(--muted);font-size:.78rem">· vendas deduzidas pela proporção de compras do Meta</span></div><div class="grid">`;
+        h+=`<div class="lbl">Preço por Temperatura — Quente × Frio <span style="font-weight:400;color:var(--muted);font-size:.78rem">· vendas deduzidas pela proporção de compras do Meta (9,90 fora da proporção)</span></div><div class="grid">`;
         h+=card('Preço Lead Quente', qV>0?BRL(precoQ):'—', 'hl v', 'Gasto '+BRLk(qSpend)+' ÷ '+NUM(qV)+' vendas', PCT(shareQ)+' das vendas')
           +card('Preço Lead Frio', fV>0?BRL(precoF):'—', 'hl v', 'Gasto '+BRLk(fSpend)+' ÷ '+NUM(fV)+' vendas', PCT(100-shareQ)+' das vendas')
           +card('Vendas Quente', NUM(qV), 'accent', 'rateado · campanhas _Q_')
