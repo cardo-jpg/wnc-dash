@@ -259,7 +259,7 @@
     const GID_METRICAS = '942932531';   // aba MÉTRICAS dentro de ADS_WB
     const UTM_MALU   = '';   // planilha de UTMs por lead (Malu) — a definir no novo lançamento
     const UTM_HIRE   = '';   // planilha de UTMs por lead (Hire) — a definir no novo lançamento
-    const SHEET_PESQUISA_ID = '1kQYVgEw6G1aHse-LVZzpIA3XT7UHDJEuKvLNJ01c880';  // credenciamento (confirmar se é a mesma do WNC)
+    const SHEET_PESQUISA_ID = '1zmeuYjfpgbg3LXloCsQjFsnKYx1dTbUvIIQlYCNt2_Q';  // pesquisa dos inscritos WNC (respostas = gid=0)
     const START = new Date(2026, 9, 23);          // 23/10/2026 — início do acompanhamento (base antiga/stories)
     const CAMP_START = new Date(2026, 9, 26);     // 26/10/2026 — início REAL da campanha (vendas geral + tráfego); base dos 25 dias
     const FLOOR = new Date(2026, 0, 1);
@@ -827,16 +827,20 @@
         try{ const t=await gviz(SHEET_PESQUISA,'gid=0'); _pesq=(t.rows||[]).filter(r=>r.c&&_ps(r.c[6])); }
         catch(e){ body.innerHTML='<div class="empty err">Erro ao carregar a pesquisa: '+e.message+'</div>'; return; }
       }
+      // Índices do formulário WNC: 3 idade · 4 gênero · 5 momento · 6 foco · 7 salário · 8 experiência
+      //                             9 inglês · 10 formação · 11 profissão · 13 segue IG · 14 morou fora · 15 estado
       const N0=_pesq.length, cnt=(i,p)=>_pesq.filter(r=>p(_ps(r.c[i]))).length;
-      const ing=cnt(10,v=>/fluente|me viro/i.test(v)), exp5=cnt(7,v=>/mais de 10|5 a 10/i.test(v)),
-        sal5=cnt(6,v=>/5 a 10|mais de 10/i.test(v)), pass=cnt(9,v=>/^n/i.test(v));
-      body.innerHTML=`<div class="lbl">Pesquisa de credenciamento · ${NUM(N0)} respostas · atualiza sozinho</div>
+      const mulh=cnt(4,v=>/mulher/i.test(v)), ing=cnt(9,v=>/fluente|me viro/i.test(v)),
+        exp5=cnt(8,v=>/mais de 10|5 a 10/i.test(v)), sal5=cnt(7,v=>/5 a 10|mais de 10/i.test(v)),
+        trans=cnt(5,v=>/transi[çc][ãa]o/i.test(v));
+      body.innerHTML=`<div class="lbl">Pesquisa dos inscritos · ${NUM(N0)} respostas · atualiza sozinho</div>
         <div class="pk-strip">
           <div class="pk"><div class="pk-l">Respostas</div><div class="pk-v">${NUM(N0)}</div><div class="pk-n">total</div></div>
+          <div class="pk"><div class="pk-l">Mulheres</div><div class="pk-v">${_pqPct(mulh,N0)}</div><div class="pk-n">do público</div></div>
           <div class="pk"><div class="pk-l">Inglês interm.+</div><div class="pk-v">${_pqPct(ing,N0)}</div><div class="pk-n">fluente ou "me viro"</div></div>
           <div class="pk"><div class="pk-l">Exp. 5+ anos</div><div class="pk-v">${_pqPct(exp5,N0)}</div><div class="pk-n">senioridade</div></div>
           <div class="pk"><div class="pk-l">Salário 5k+</div><div class="pk-v">${_pqPct(sal5,N0)}</div><div class="pk-n">poder de compra</div></div>
-          <div class="pk"><div class="pk-l">Sem passaporte UE</div><div class="pk-v">${_pqPct(pass,N0)}</div><div class="pk-n">precisam de visto</div></div>
+          <div class="pk"><div class="pk-l">Querem transição</div><div class="pk-v">${_pqPct(trans,N0)}</div><div class="pk-n">mudar de carreira</div></div>
         </div>
         <div class="pq-grid">
           ${_pqCard('Foco hoje','pqFoco')}
@@ -844,22 +848,26 @@
           ${_pqCard('Faixa salarial','pqSal')}
           ${_pqCard('Experiência','pqExp')}
           ${_pqCard('Idade','pqIda')}
-          ${_pqCard('Passaporte europeu','pqPass')}
+          ${_pqCard('Gênero','pqGen')}
+          ${_pqCard('Momento de carreira','pqHoje')}
           ${_pqCard('Já morou fora?','pqFora')}
+          ${_pqCard('Formação','pqForm')}
           ${_pqCard('Há quanto tempo segue','pqSeg')}
           ${_pqCloud('Área / profissão','pqProf')}
           ${_pqCard('Estado','pqEst','pq-wide')}
         </div>`;
-      pie('pqFoco',_pqAgg(5,null,_pqFoco));
-      pie('pqIng',_pqAgg(10));
-      pie('pqSal',_pqAgg(6));
-      hbar('pqExp',_pqAgg(7));
+      pie('pqFoco',_pqAgg(6,null,_pqFoco));
+      pie('pqIng',_pqAgg(9));
+      pie('pqSal',_pqAgg(7));
+      hbar('pqExp',_pqAgg(8));
       pie('pqIda',_pqAgg(3));
-      wordCloud('pqProf',_pqAgg(13,14,_pqProf));
-      pie('pqPass',_pqAgg(9,null,_pqSN));
-      pie('pqFora',_pqAgg(16));
-      hbar('pqSeg',_pqAgg(15));
-      hbar('pqEst',_pqAgg(17,14));
+      pie('pqGen',_pqAgg(4));
+      pie('pqHoje',_pqAgg(5));
+      pie('pqFora',_pqAgg(14));
+      hbar('pqForm',_pqAgg(10));
+      hbar('pqSeg',_pqAgg(13));
+      wordCloud('pqProf',_pqAgg(11,14,_pqProf));
+      hbar('pqEst',_pqAgg(15,14,v=>/n[ãa]o moro/i.test(v)?'':v));
       const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     }
 
