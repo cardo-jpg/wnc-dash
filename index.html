@@ -590,7 +590,13 @@
 
     function render(){
       killCharts();
-      const mrows = (profile==='malu'?DATA.malu:profile==='hire'?DATA.hire:DATA.malu.concat(DATA.hire)).filter(r=>inRange(r.date));
+      // Último dia com venda real (19/11). O gasto "de hoje" das campanhas de INGRESSO (pausadas) só
+      // aparece por causa do fuso de Dubai da conta, que joga o leftover pro dia seguinte — é lixo e sai.
+      // O lembrete NÃO é cortado (roda legítimo até o evento 21-22/11).
+      const _serHas=((DATA.metricas&&DATA.metricas.series)||[]).filter(s=>s.hasData);
+      const _cut=_serHas.length ? _serHas[_serHas.length-1].date : (function(){const h=new Date();h.setHours(0,0,0,0);return h;})();
+      const _noLixo = r => r.bucket!=='ingresso' || r.date<=_cut;   // corta só o ingresso depois de 19/11
+      const mrows = (profile==='malu'?DATA.malu:profile==='hire'?DATA.hire:DATA.malu.concat(DATA.hire)).filter(r=>inRange(r.date) && _noLixo(r));
       const urows = (profile==='malu'?DATA.umalu:profile==='hire'?DATA.uhire:DATA.umalu.concat(DATA.uhire)).filter(r=>inRange(r.date));
       // Verba por frente: lembrete e mentoria têm meta própria e não poluem o CPA/
       // investido do lançamento de ingresso. Os KPIs abaixo usam só INGRESSO.
