@@ -245,6 +245,7 @@
       <button class="tab" data-p="campanhas" onclick="setTab(this)">Campanhas</button>
       <button class="tab" data-p="publicos" onclick="setTab(this)">Públicos</button>
       <button class="tab" data-p="criativos" onclick="setTab(this)">Criativos</button>
+      <button class="tab" data-p="lembrete" onclick="setTab(this)">Lembrete</button>
       <button class="tab" data-p="lp" onclick="setTab(this)">LP</button>
       <button class="tab" data-p="pesquisa" onclick="setTab(this)">Pesquisa</button>
     </div>
@@ -889,6 +890,7 @@
       if(view==='campanhas') return renderCampanhas();
       if(view==='publicos') return renderPublicos();
       if(view==='criativos') return renderCriativos();
+      if(view==='lembrete') return renderLembrete();
       if(view==='lp') return renderLP();
       if(view==='pesquisa') return renderPesquisa();
       if(view==='vendas') return renderVendas();
@@ -1142,6 +1144,33 @@
       h+=`</tbody></table></div>`;
       document.getElementById('body').innerHTML=h;
       applyFilter('criativos');
+      document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+    // Aba dedicada do LEMBRETE: resumo + criativos da campanha FB64 (bucket 'lembrete').
+    function renderLembrete(){
+      killCharts();
+      const rows=DATA.malu.filter(r=>r.bucket==='lembrete' && inRange(r.date));
+      if(!rows.length){ document.getElementById('body').innerHTML='<div class="lbl">Lembrete</div><div class="empty">Sem campanha de lembrete no período selecionado.</div>'; return; }
+      const T=rows.reduce((a,r)=>{ a.inv+=r.cost; a.imp+=r.impressions; a.clk+=r.clicks; a.vlp+=(r.pageview||0); return a; },{inv:0,imp:0,clk:0,vlp:0});
+      const byCri={};
+      for(const r of rows){ const k=r.anuncio||'—'; const o=byCri[k]||(byCri[k]={nome:k,link:r.link,status:r.status,inv:0,imp:0,clk:0});
+        o.inv+=r.cost; o.imp+=r.impressions; o.clk+=r.clicks; if(!o.link&&r.link)o.link=r.link; if(r.status&&/active|ativ/i.test(r.status))o.status=r.status; }
+      const ads=Object.values(byCri).sort((a,b)=>b.inv-a.inv);
+      const camp=rows[0].campanha||'Lembrete';
+      let h=`<div class="lbl">Lembrete · ${camp}</div><div class="grid">`
+        +card('Investido', BRL(T.inv), 'hl v', 'verba por objetivo · fora do CPA de ingresso')
+        +card('Impressões', NUM(T.imp))
+        +card('Cliques', NUM(T.clk))
+        +card('CTR', PCT(T.imp? T.clk/T.imp*100 : 0))
+        +`</div>`;
+      h+=`<div class="lbl">Criativos do Lembrete (${ads.length})</div><div class="twrap"><table><thead><tr>
+        <th>Criativo</th><th>Status</th><th>Investido</th><th>Impressões</th><th>Cliques</th><th>CTR</th></tr></thead><tbody>`;
+      for(const a of ads){
+        h+=`<tr><td title="${a.nome}">${a.link?`<a class="vlink" href="${a.link}" target="_blank">${a.nome}</a>`:a.nome}</td>
+          <td>${a.status||'—'}</td><td>${BRL(a.inv)}</td><td>${NUM(a.imp)}</td><td>${NUM(a.clk)}</td><td>${PCT(a.imp? a.clk/a.imp*100 : 0)}</td></tr>`;
+      }
+      h+=`</tbody></table></div>`;
+      document.getElementById('body').innerHTML=h;
       document.getElementById('updated').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     }
 
