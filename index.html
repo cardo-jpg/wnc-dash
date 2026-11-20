@@ -332,6 +332,19 @@
       }
       return out;
     }
+    // Aba LEMBRETE (gid 1855087671) — colunas próprias: Date0, Campanha1, Publico2, Criativo3, URL4,
+    // Investido5, Impressoes6, Cliques7, Leads8, Visualizacoes_LP9, Status10. Normaliza pro formato de metaRows,
+    // bucket 'lembrete' (fica fora do CPA de ingresso). A campanha NÃO está na Malu/Hire Meta, então não duplica.
+    function lembreteRows(table){
+      const out=[];
+      for(const r of (table.rows||[])){
+        const c=r.c||[]; const d=cDate(c[0]); if(!d||d<START) continue;
+        out.push({ date:d, campanha:cStr(c[1]), adset:cStr(c[2]), cost:cNum(c[5]), impressions:cNum(c[6]), reach:0,
+          clicks:cNum(c[7]), pageview:cNum(c[9]), ic:cNum(c[8]), compras:0,
+          link:cStr(c[4]), anuncio:cStr(c[3]), faturamento:0, status:cStr(c[10]), bucket:'lembrete' });
+      }
+      return out;
+    }
     function utmRows(table){
       // Date, Email, utm_source, utm_campaign, utm_medium, utm_content, utm_term
       const out=[];
@@ -661,7 +674,6 @@
       // ── 1) Tráfego · Ads (Meta Ads) ──
       h+=`<div class="lbl">Tráfego · Ads (Meta Ads)</div><div class="grid">`;
       h+=card('Investido Total', BRL(k.investido), 'hl v', 'Previsto: '+BRLk(m.investimento), 'Taxa investida '+PCT(div(k.investido,m.investimento)*100))
-        +(_hojeGasto>0?card('Gasto de Hoje', BRL(_hojeGasto), '', 'parcial · ainda sem venda', 'não entra no CPA'):'')
         +card('Vendas Ads', NUM(vAds), 'accent', mc?('Fonte: planilha'+(_ddSale?' · até '+_ddSale:'')):'')
         +(mc?card('START ADS', NUM(cumInRange('startAds'))):'')
         +(mc?card('VIP ADS', NUM(cumInRange('vipAds'))):'')
@@ -1365,7 +1377,7 @@
       document.getElementById('body').innerHTML='<div class="loading">Carregando dados da planilha…</div>';
       try{
         const UTMQ="gid=0&tq="+encodeURIComponent("select * where A >= date '2026-10-23'");
-        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas]=await Promise.all([
+        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas,tLembrete]=await Promise.all([
           gviz(FONTE,'sheet='+encodeURIComponent('Malu Meta')),
           gviz(FONTE,'sheet='+encodeURIComponent('Hire Meta')),
           gviz(FONTE,'sheet='+encodeURIComponent('Metas')).catch(()=>null),
@@ -1373,8 +1385,10 @@
           (UTM_HIRE?gviz(UTM_HIRE,UTMQ):Promise.resolve(null)).catch(()=>null),
           gviz(ADS_WB,'gid='+GID_METRICAS).catch(()=>null),
           gviz(FONTE,'sheet='+encodeURIComponent('Vendas')).catch(()=>null),
+          gviz(FONTE,'gid=1855087671').catch(()=>null),   // aba Lembrete (MALU_MMF_FB64)
         ]);
-        DATA.malu=metaRows(tMalu); DATA.hire=metaRows(tHire);
+        // Lembrete entra no bucket 'lembrete' (card Lembrete), fora do CPA/investido de ingresso.
+        DATA.malu=metaRows(tMalu).concat(tLembrete?lembreteRows(tLembrete):[]); DATA.hire=metaRows(tHire);
         DATA.umalu=tuMalu?utmRows(tuMalu):[]; DATA.uhire=tuHire?utmRows(tuHire):[];
         DATA.metas=tMetas?readMetas(tMetas):{...METAS_DEFAULT};
         DATA.metricas=tMetr?metricasParse(tMetr):null;
