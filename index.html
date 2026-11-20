@@ -735,10 +735,8 @@
       // Charts — vendas Orgânico (verde) + Ads (roxo) empilhadas + investido/dia (linha). Só dias com dado.
       const invByDay={};
       for(const r of launchRows){ const kd=dkey(r.date); invByDay[kd]=(invByDay[kd]||0)+r.cost; }
-      // Vendas Ads/dia = campo "Compras" das abas Malu/Hire Meta (públicas, fonte da Maria).
-      // Antes vinha da planilha MÉTRICAS (privada → dava 401 no navegador e zerava o gráfico).
-      const pagoByDay={}; for(const r of launchRows){ if(r.compras>0){ const kd=dkey(r.date); pagoByDay[kd]=(pagoByDay[kd]||0)+r.compras; } }
-      // Vendas Orgânicas/dia só existem na planilha MÉTRICAS; se ela não carregar, a barra verde fica vazia.
+      // Vendas Ads/dia: número real da planilha, rateado pro perfil selecionado.
+      const pagoByDay = adsByDay(mrows);
       const orgByDay={}; ((DATA.metricas&&DATA.metricas.series)||[]).forEach(s=>{ const v=Math.max(0, s.paceDia||0); if(v>0) orgByDay[dkey(s.date)]=v; });
       const _dset=new Set([...Object.keys(invByDay).filter(k=>invByDay[k]>0||pagoByDay[k]>0), ...Object.keys(orgByDay)]);
       const _dates=[..._dset].sort();
