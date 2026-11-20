@@ -1428,6 +1428,15 @@
         DATA.hire.forEach(r=>{ r.cost *= cot; });
         // Só o Investimento é US$ (Meta); Faturamento/Valor Carrinho já vêm em R$ (checkout).
         DATA.vendas.forEach(r=>{ r.inv *= cot; });
+        // Aviso persistente se a planilha MÉTRICAS não carregou (acesso/privada) — senão o gráfico de
+        // vendas/dia e o card Orgânico zeram em silêncio e parece bug. Fica fora do #body (não some ao trocar aba).
+        (function(){ const bd=document.getElementById('body'); let w=document.getElementById('metrWarn');
+          if(!DATA.metricas){ if(!w){ w=document.createElement('div'); w.id='metrWarn';
+              w.style.cssText='background:#4a1515;color:#ffd4d4;padding:11px 18px;margin:0 0 14px;border-radius:8px;font-size:13px;font-weight:600;text-align:center;border:1px solid #7a2a2a';
+              bd.parentNode.insertBefore(w, bd); }
+            w.textContent='⚠ Planilha MÉTRICAS sem acesso (privada) — Vendas/dia e Orgânico ficam zerados. Libere: Compartilhar → "Qualquer pessoa com o link · Leitor".';
+          } else if(w){ w.remove(); }
+        })();
         await loadOverrides();     // overrides manuais de status (servidor) antes de renderizar
         route();
         const _hp=(location.hash||'').replace('#','');   // abre a aba do #hash (deep-link)
