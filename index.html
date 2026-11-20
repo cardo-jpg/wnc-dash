@@ -254,6 +254,7 @@
     <div class="foot" id="foot">Atualiza automaticamente a cada abertura · dados de 23/10 em diante, incluindo o dia em andamento · vendas vêm da planilha MÉTRICAS</div>
   </div>
 
+  <script src="metricas_fallback.js"></script>
   <script>
     // ── Config ───────────────────────────────────────────────────────────────
     const FONTE      = '1vLkRQZNB9Fvsa5aDD1_gZ_QyZdp0pbZ9u26vuvRXpOI';  // dados da Maria: Malu Meta / Hire Meta / Vendas / Metas
@@ -1420,7 +1421,9 @@
         DATA.malu=metaRows(tMalu).concat(tLembrete?lembreteRows(tLembrete):[]); DATA.hire=metaRows(tHire);
         DATA.umalu=tuMalu?utmRows(tuMalu):[]; DATA.uhire=tuHire?utmRows(tuHire):[];
         DATA.metas=tMetas?readMetas(tMetas):{...METAS_DEFAULT};
-        DATA.metricas=tMetr?metricasParse(tMetr):null;
+        const _metrLive = tMetr ? metricasParse(tMetr) : null;   // ao vivo (planilha MÉTRICAS, se liberada)
+        const _usandoSnapshot = !_metrLive;                       // caiu pra cópia embutida?
+        DATA.metricas = _metrLive || metricasParse(METRICAS_FALLBACK);  // nunca fica null → gráfico/orgânico não zeram
         DATA.vendas=tVendas?vendaRows(tVendas):[];
         // Cost vem em US$ (conta do Meta) → converte p/ R$ pela cotação (aba Metas ou 5,19)
         const cot = DATA.metas.cotacao || 5.19;
@@ -1428,13 +1431,13 @@
         DATA.hire.forEach(r=>{ r.cost *= cot; });
         // Só o Investimento é US$ (Meta); Faturamento/Valor Carrinho já vêm em R$ (checkout).
         DATA.vendas.forEach(r=>{ r.inv *= cot; });
-        // Aviso persistente se a planilha MÉTRICAS não carregou (acesso/privada) — senão o gráfico de
-        // vendas/dia e o card Orgânico zeram em silêncio e parece bug. Fica fora do #body (não some ao trocar aba).
+        // Se a MÉTRICAS ao vivo não carregou (privada/401), a dash usa a cópia embutida e avisa (sem alarde).
+        // Fica fora do #body (não some ao trocar de aba). Quando a planilha for reaberta, volta pro ao vivo sozinha.
         (function(){ const bd=document.getElementById('body'); let w=document.getElementById('metrWarn');
-          if(!DATA.metricas){ if(!w){ w=document.createElement('div'); w.id='metrWarn';
-              w.style.cssText='background:#4a1515;color:#ffd4d4;padding:11px 18px;margin:0 0 14px;border-radius:8px;font-size:13px;font-weight:600;text-align:center;border:1px solid #7a2a2a';
+          if(_usandoSnapshot){ if(!w){ w=document.createElement('div'); w.id='metrWarn';
+              w.style.cssText='background:#3a3410;color:#ffe9a8;padding:10px 18px;margin:0 0 14px;border-radius:8px;font-size:12.5px;font-weight:600;text-align:center;border:1px solid #6a5e1e';
               bd.parentNode.insertBefore(w, bd); }
-            w.textContent='⚠ Planilha MÉTRICAS sem acesso (privada) — Vendas/dia e Orgânico ficam zerados. Libere: Compartilhar → "Qualquer pessoa com o link · Leitor".';
+            w.textContent='MÉTRICAS ao vivo sem acesso — usando cópia de 19/11/2026. Para voltar ao tempo real, libere a planilha (Compartilhar → "Qualquer pessoa com o link · Leitor").';
           } else if(w){ w.remove(); }
         })();
         await loadOverrides();     // overrides manuais de status (servidor) antes de renderizar
