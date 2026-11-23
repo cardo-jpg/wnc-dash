@@ -1326,40 +1326,12 @@
       const g=vAgg(rows);
       const cot=(DATA.metas&&DATA.metas.cotacao)||5.19;   // Investimento vem em US$ (conta Meta)
       const camps=[...new Set(rows.map(r=>r.campanha))].filter(x=>x&&x!=='—');
-      // Funil limpo: cards empilhados + barra proporcional + taxa de conversão entre etapas.
-      // Carrinho/Checkout da mentoria não são rastreados (checkout externo) → vêm 0, mas não quebram o visual.
-      const fsteps=[
-        ['Impressões',          g.imp,    null],
-        ['Cliques no link',     g.clk,    g.imp? div(g.clk,g.imp)*100   : null],
-        ['Visitas no site',     g.vis,    g.clk? div(g.vis,g.clk)*100   : null],
-        ['Adições ao carrinho', g.cart,   g.vis? div(g.cart,g.vis)*100  : null],
-        ['Checkout',            g.chk,    g.cart?div(g.chk,g.cart)*100  : null],
-        ['Vendas',              g.vendas, g.chk? div(g.vendas,g.chk)*100: null],
-      ];
-      const _maxV=Math.max(1,g.imp);
-      let fn='<div style="max-width:470px;margin:2px auto 0;display:flex;flex-direction:column">';
-      fsteps.forEach(([name,v,rate],i)=>{
-        if(i>0) fn+=`<div style="display:flex;align-items:center;gap:9px;padding:5px 0;color:var(--faint);font-size:.66rem;letter-spacing:.05em"><span style="flex:1;height:1px;background:var(--line)"></span><span>${rate!=null?PCT(rate):'—'}</span><span style="flex:1;height:1px;background:var(--line)"></span></div>`;
-        const w=Math.max(4, v/_maxV*100), last=i===fsteps.length-1;
-        fn+=`<div style="padding:11px 15px;border-radius:11px;background:${last?'rgba(184,155,245,.13)':'var(--surface)'};border:1px solid ${last?'var(--accent)':'var(--border)'}">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px"><span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">${name}</span><span style="font-weight:800;font-size:1.12rem;color:var(--text)">${NUM(v)}</span></div>
-          <div style="height:6px;border-radius:4px;background:var(--raise);overflow:hidden"><div style="height:100%;width:${w}%;border-radius:4px;background:linear-gradient(90deg,#7c5cf0,var(--accent))"></div></div>
-        </div>`;
-      });
-      fn+='</div>';
-      // Header GERAL (KPIs de dinheiro)
-      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA MALU · Vendas${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Investido convertido US$ → R$ (× ${cot.toLocaleString('pt-BR',{minimumFractionDigits:2})}) · Faturamento já em R$</div></div><div class="lp-geral-stats">
+      // KPIs do topo (sem faturamento/ROAS/ticket — o faturamento da planilha Stract está errado)
+      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA MALU · Vendas${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Investido convertido US$ → R$ (× ${cot.toLocaleString('pt-BR',{minimumFractionDigits:2})})</div></div><div class="lp-geral-stats">
         <div><div class="lp-meta-lbl">Investido</div><div class="lp-meta-val">${BRL(g.inv)}</div></div>
         <div><div class="lp-meta-lbl">Vendas</div><div class="lp-meta-val">${NUM(g.vendas)}</div></div>
-        <div><div class="lp-meta-lbl">Faturamento</div><div class="lp-meta-val">${g.vendas>0?BRL(g.fat):'—'}</div></div>
         <div><div class="lp-meta-lbl">CPA</div><div class="lp-meta-val">${g.vendas>0?BRL(g.cpa):'—'}</div></div>
-        <div><div class="lp-meta-lbl">ROAS</div><div class="lp-meta-val accent">${g.vendas>0?RS(g.roas):'—'}</div></div>
-        <div><div class="lp-meta-lbl">Ticket Médio</div><div class="lp-meta-val">${g.vendas>0?BRL(g.ticket):'—'}</div></div>
       </div></div>`;
-      // Painel do funil
-      h+=`<div class="lp-panel"><div class="lp-header"><div class="lp-header-left"><div class="lp-header-name">Funil de Vendas — Mentoria Malu</div></div>
-        <div class="lp-header-right"><div><div class="lp-meta-lbl">Custo por visita</div><div class="lp-meta-val">${g.vis?BRL(g.cpv):'—'}</div></div></div></div>
-        <div style="max-width:540px;margin:8px auto 0">${fn}</div></div>`;
       // Tabela por grupo (Criativo / Campanha / Público)
       const keyf = vendasGroup==='campanha'? r=>r.campanha : vendasGroup==='publico'? r=>r.publico : r=>r.criativo;
       const glabel = vendasGroup==='campanha'?'Campanha':vendasGroup==='publico'?'Público':'Criativo';
@@ -1371,11 +1343,11 @@
       h+=`<div class="lbl">Detalhe por ${glabel} (${list.length})</div>
         <div class="vgsel">${gb('criativo','Criativo')}${gb('campanha','Campanha')}${gb('publico','Público')}</div>
         <div class="twrap"><table><thead><tr>
-        ${sortTh('vendas','k',glabel,1)}<th>Status</th>${sortTh('vendas','inv','Investido')}${sortTh('vendas','imp','Impr.')}${sortTh('vendas','ctr','CTR')}${sortTh('vendas','clk','Cliques')}${sortTh('vendas','vis','Visitas')}${sortTh('vendas','cart','Add Cart')}${sortTh('vendas','chk','Checkout')}${sortTh('vendas','vendas','Vendas')}${sortTh('vendas','cpa','CPA')}${sortTh('vendas','fat','Fat.')}${sortTh('vendas','roas','ROAS')}
+        ${sortTh('vendas','k',glabel,1)}<th>Status</th>${sortTh('vendas','inv','Investido')}${sortTh('vendas','imp','Impr.')}${sortTh('vendas','ctr','CTR')}${sortTh('vendas','clk','Cliques')}${sortTh('vendas','vis','Visitas')}${sortTh('vendas','cart','Add Cart')}${sortTh('vendas','chk','Checkout')}${sortTh('vendas','vendas','Vendas')}${sortTh('vendas','cpa','CPA')}
       </tr></thead><tbody>`;
       const vtype='v'+vendasGroup;   // namespace de status próprio da aba Vendas (não colide c/ workshop)
       for(const o of list){
-        h+=`<tr><td title="${o.k}">${o.link?`<a class="vlink" href="${o.link}" target="_blank">${o.k}</a>`:o.k}</td><td>${stBadgeClk(vtype,o.k,'ACTIVE')}</td><td>${BRL(o.inv)}</td><td>${NUM(o.imp)}</td><td>${PCT(o.ctr)}</td><td>${NUM(o.clk)}</td><td>${NUM(o.vis)}</td><td>${NUM(o.cart)}</td><td>${NUM(o.chk)}</td><td>${NUM(o.vendas)}</td><td>${o.vendas>0?BRL(o.cpa):'—'}</td><td>${o.vendas>0?BRL(o.fat):'—'}</td><td>${o.vendas>0?RS(o.roas):'—'}</td></tr>`;
+        h+=`<tr><td title="${o.k}">${o.link?`<a class="vlink" href="${o.link}" target="_blank">${o.k}</a>`:o.k}</td><td>${stBadgeClk(vtype,o.k,'ACTIVE')}</td><td>${BRL(o.inv)}</td><td>${NUM(o.imp)}</td><td>${PCT(o.ctr)}</td><td>${NUM(o.clk)}</td><td>${NUM(o.vis)}</td><td>${NUM(o.cart)}</td><td>${NUM(o.chk)}</td><td>${NUM(o.vendas)}</td><td>${o.vendas>0?BRL(o.cpa):'—'}</td></tr>`;
       }
       h+=`</tbody></table></div>`;
       document.getElementById('body').innerHTML=h;
