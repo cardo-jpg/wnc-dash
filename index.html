@@ -1326,20 +1326,26 @@
       const g=vAgg(rows);
       const cot=(DATA.metas&&DATA.metas.cotacao)||5.19;   // Investimento vem em US$ (conta Meta)
       const camps=[...new Set(rows.map(r=>r.campanha))].filter(x=>x&&x!=='—');
-      // Funil
-      const steps=[
-        {n:'IMPRESSÕES',          v:g.imp,    wt:100, wb:84, rate:'CTR '+PCT(g.ctr)},
-        {n:'CLIQUES NO LINK',     v:g.clk,    wt:84,  wb:66, rate:'VISITA '+PCT(div(g.vis,g.clk)*100)},
-        {n:'VISITAS NO SITE',     v:g.vis,    wt:64,  wb:50, rate:'ADD CARRINHO '+PCT(div(g.cart,g.vis)*100)},
-        {n:'ADIÇÕES AO CARRINHO', v:g.cart,   wt:48,  wb:36, rate:'CHECKOUT '+PCT(div(g.chk,g.cart)*100)},
-        {n:'CHECKOUT',            v:g.chk,    wt:34,  wb:24, rate:'TX CONVERSÃO '+PCT(g.txvenda)},
-        {n:'VENDAS',              v:g.vendas, wt:22,  wb:16, rate:''},
+      // Funil limpo: cards empilhados + barra proporcional + taxa de conversão entre etapas.
+      // Carrinho/Checkout da mentoria não são rastreados (checkout externo) → vêm 0, mas não quebram o visual.
+      const fsteps=[
+        ['Impressões',          g.imp,    null],
+        ['Cliques no link',     g.clk,    g.imp? div(g.clk,g.imp)*100   : null],
+        ['Visitas no site',     g.vis,    g.clk? div(g.vis,g.clk)*100   : null],
+        ['Adições ao carrinho', g.cart,   g.vis? div(g.cart,g.vis)*100  : null],
+        ['Checkout',            g.chk,    g.cart?div(g.chk,g.cart)*100  : null],
+        ['Vendas',              g.vendas, g.chk? div(g.vendas,g.chk)*100: null],
       ];
-      let fn='<div class="fn">';
-      for(let si=0;si<steps.length;si++){ const s=steps[si]; const tl=(100-s.wt)/2,tr=(100+s.wt)/2,br=(100+s.wb)/2,bl=(100-s.wb)/2; const L=34+si*7;
-        fn+=`<div class="fn-seg" style="clip-path:polygon(${tl}% 0,${tr}% 0,${br}% 100%,${bl}% 100%);background:linear-gradient(180deg,hsla(285,52%,${L}%,.92),hsla(285,52%,${L-7}%,.86))"><div class="fn-lbl">${s.n}</div><div class="fn-val">${NUM(s.v)}</div></div>`;
-        if(s.rate) fn+=`<div class="fn-rate"><span class="fn-pill">${s.rate}</span></div>`;
-      }
+      const _maxV=Math.max(1,g.imp);
+      let fn='<div style="max-width:470px;margin:2px auto 0;display:flex;flex-direction:column">';
+      fsteps.forEach(([name,v,rate],i)=>{
+        if(i>0) fn+=`<div style="display:flex;align-items:center;gap:9px;padding:5px 0;color:var(--faint);font-size:.66rem;letter-spacing:.05em"><span style="flex:1;height:1px;background:var(--line)"></span><span>${rate!=null?PCT(rate):'—'}</span><span style="flex:1;height:1px;background:var(--line)"></span></div>`;
+        const w=Math.max(4, v/_maxV*100), last=i===fsteps.length-1;
+        fn+=`<div style="padding:11px 15px;border-radius:11px;background:${last?'rgba(184,155,245,.13)':'var(--surface)'};border:1px solid ${last?'var(--accent)':'var(--border)'}">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px"><span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">${name}</span><span style="font-weight:800;font-size:1.12rem;color:var(--text)">${NUM(v)}</span></div>
+          <div style="height:6px;border-radius:4px;background:var(--raise);overflow:hidden"><div style="height:100%;width:${w}%;border-radius:4px;background:linear-gradient(90deg,#7c5cf0,var(--accent))"></div></div>
+        </div>`;
+      });
       fn+='</div>';
       // Header GERAL (KPIs de dinheiro)
       let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA MALU · Vendas${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Investido convertido US$ → R$ (× ${cot.toLocaleString('pt-BR',{minimumFractionDigits:2})}) · Faturamento já em R$</div></div><div class="lp-geral-stats">
