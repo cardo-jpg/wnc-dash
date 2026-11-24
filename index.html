@@ -273,7 +273,7 @@
       investimento:132000, cpa:80, cpm:25, ctr:0.80, connect_rate:82,
       cotacao:5.20, data_inicio:'26/10/2026', data_evento:'21 e 22/11' };
 
-    let DATA = { malu:[], hire:[], umalu:[], uhire:[], metas:{...METAS_DEFAULT}, metricas:null, vendas:[] };
+    let DATA = { malu:[], hire:[], umalu:[], uhire:[], metas:{...METAS_DEFAULT}, metricas:null, vendas:[], vendasHire:[] };
     let profile = 'geral', presetDays = 'all';
 
     const BRL = v => (v==null||isNaN(v)) ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1314,20 +1314,12 @@
       return a;
     }
     function setVendasGroup(el){ document.querySelectorAll('.vgbtn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); vendasGroup=el.dataset.g; renderVendas(); }
-    function renderVendas(){
-      killCharts();
-      const upd=()=>{ const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
-      // A aba Vendas NÃO esconde o dia atual: gasto E venda vêm na MESMA linha da
-      // planilha "Vendas" (sem o lag que estoura o CPA nas abas do workshop, onde a
-      // venda é lançada depois na MÉTRICAS). Por isso não aplica o teto d>ontem().
-      const inRangeV = d => (!fStart||d>=fStart) && (!fEnd||d<=fEnd) && d>=cutoff();
-      const rows=(DATA.vendas||[]).filter(r=>inRangeV(r.date));
-      if(!rows.length){ document.getElementById('body').innerHTML='<div class="empty">Sem dados de vendas no período</div>'; upd(); return; }
+    // Monta um bloco de vendas (card KPI + tabela por grupo) para UMA conta (Malu ou Hire).
+    function _vendasBlock(rows, label, cot, ns){
       const g=vAgg(rows);
-      const cot=(DATA.metas&&DATA.metas.cotacao)||5.19;   // Investimento vem em US$ (conta Meta)
       const camps=[...new Set(rows.map(r=>r.campanha))].filter(x=>x&&x!=='—');
       // KPIs do topo (sem faturamento/ROAS/ticket — o faturamento da planilha Stract está errado)
-      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA MALU · Vendas${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Investido convertido US$ → R$ (× ${cot.toLocaleString('pt-BR',{minimumFractionDigits:2})})</div></div><div class="lp-geral-stats">
+      let h=`<div class="lp-geral"><div class="lp-geral-lbl">${label}${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Investido convertido US$ → R$ (× ${cot.toLocaleString('pt-BR',{minimumFractionDigits:2})})</div></div><div class="lp-geral-stats">
         <div><div class="lp-meta-lbl">Investido</div><div class="lp-meta-val">${BRL(g.inv)}</div></div>
         <div><div class="lp-meta-lbl">Vendas</div><div class="lp-meta-val">${NUM(g.vendas)}</div></div>
         <div><div class="lp-meta-lbl">CPA</div><div class="lp-meta-val">${g.vendas>0?BRL(g.cpa):'—'}</div></div>
@@ -1338,18 +1330,35 @@
       const by={};
       for(const r of rows){ const k=keyf(r)||'—'; const o=by[k]||(by[k]={k, link:'', _rows:[]}); if(!o.link&&r.link)o.link=r.link; o._rows.push(r); }
       let list=Object.values(by).map(o=>Object.assign({k:o.k, link:o.link}, vAgg(o._rows)));
-      list=sortRows('vendas', list, 'inv');
-      const gb=(gg,lbl)=>`<button class="vgbtn${vendasGroup===gg?' active':''}" data-g="${gg}" onclick="setVendasGroup(this)">${lbl}</button>`;
+      list=sortRows(ns, list, 'inv');
       h+=`<div class="lbl">Detalhe por ${glabel} (${list.length})</div>
-        <div class="vgsel">${gb('criativo','Criativo')}${gb('campanha','Campanha')}${gb('publico','Público')}</div>
         <div class="twrap"><table><thead><tr>
-        ${sortTh('vendas','k',glabel,1)}<th>Status</th>${sortTh('vendas','inv','Investido')}${sortTh('vendas','imp','Impr.')}${sortTh('vendas','ctr','CTR')}${sortTh('vendas','clk','Cliques')}${sortTh('vendas','vis','Visitas')}${sortTh('vendas','cart','Add Cart')}${sortTh('vendas','chk','Checkout')}${sortTh('vendas','vendas','Vendas')}${sortTh('vendas','cpa','CPA')}
+        ${sortTh(ns,'k',glabel,1)}<th>Status</th>${sortTh(ns,'inv','Investido')}${sortTh(ns,'imp','Impr.')}${sortTh(ns,'ctr','CTR')}${sortTh(ns,'clk','Cliques')}${sortTh(ns,'vis','Visitas')}${sortTh(ns,'cart','Add Cart')}${sortTh(ns,'chk','Checkout')}${sortTh(ns,'vendas','Vendas')}${sortTh(ns,'cpa','CPA')}
       </tr></thead><tbody>`;
-      const vtype='v'+vendasGroup;   // namespace de status próprio da aba Vendas (não colide c/ workshop)
+      const vtype=(ns==='vendasHire'?'vh':'v')+vendasGroup;   // namespace de status próprio por conta (não colide entre Malu/Hire nem c/ workshop)
       for(const o of list){
         h+=`<tr><td title="${o.k}">${o.link?`<a class="vlink" href="${o.link}" target="_blank">${o.k}</a>`:o.k}</td><td>${stBadgeClk(vtype,o.k,'ACTIVE')}</td><td>${BRL(o.inv)}</td><td>${NUM(o.imp)}</td><td>${PCT(o.ctr)}</td><td>${NUM(o.clk)}</td><td>${NUM(o.vis)}</td><td>${NUM(o.cart)}</td><td>${NUM(o.chk)}</td><td>${NUM(o.vendas)}</td><td>${o.vendas>0?BRL(o.cpa):'—'}</td></tr>`;
       }
       h+=`</tbody></table></div>`;
+      return h;
+    }
+    function renderVendas(){
+      killCharts();
+      const upd=()=>{ const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
+      // A aba Vendas NÃO esconde o dia atual: gasto E venda vêm na MESMA linha da planilha
+      // (sem o lag que estoura o CPA nas abas do workshop). Por isso não aplica o teto d>ontem().
+      const inRangeV = d => (!fStart||d>=fStart) && (!fEnd||d<=fEnd) && d>=cutoff();
+      const maluRows=(DATA.vendas||[]).filter(r=>inRangeV(r.date));
+      const hireRows=(DATA.vendasHire||[]).filter(r=>inRangeV(r.date));
+      if(!maluRows.length && !hireRows.length){ document.getElementById('body').innerHTML='<div class="empty">Sem dados de vendas no período</div>'; upd(); return; }
+      const cot=(DATA.metas&&DATA.metas.cotacao)||5.19;   // Investimento vem em US$ (conta Meta)
+      const gb=(gg,lbl)=>`<button class="vgbtn${vendasGroup===gg?' active':''}" data-g="${gg}" onclick="setVendasGroup(this)">${lbl}</button>`;
+      // Um seletor de grupo no topo comanda os dois blocos (Malu e Hire).
+      let h=`<div class="vgsel">${gb('criativo','Criativo')}${gb('campanha','Campanha')}${gb('publico','Público')}</div>`;
+      h+= maluRows.length ? _vendasBlock(maluRows,'MENTORIA MALU · Vendas',cot,'vendas')
+                          : `<div class="lbl">MENTORIA MALU · Vendas</div><div class="empty">Sem vendas da Malu no período</div>`;
+      h+= hireRows.length ? _vendasBlock(hireRows,'MENTORIA HIRE · Vendas',cot,'vendasHire')
+                          : `<div class="lbl" style="margin-top:22px">MENTORIA HIRE · Vendas</div><div class="empty">Sem vendas da Hire no período</div>`;
       document.getElementById('body').innerHTML=h;
       upd();
     }
@@ -1392,7 +1401,7 @@
       document.getElementById('body').innerHTML='<div class="loading">Carregando dados da planilha…</div>';
       try{
         const UTMQ="gid=0&tq="+encodeURIComponent("select * where A >= date '2026-10-23'");
-        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas,tLembrete]=await Promise.all([
+        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas,tLembrete,tVendasHire]=await Promise.all([
           gviz(FONTE,'sheet='+encodeURIComponent('Malu Meta')),
           gviz(FONTE,'sheet='+encodeURIComponent('Hire Meta')),
           gviz(FONTE,'sheet='+encodeURIComponent('Metas')).catch(()=>null),
@@ -1401,6 +1410,7 @@
           gviz(ADS_WB,'gid='+GID_METRICAS).catch(()=>null),
           gviz(FONTE,'sheet='+encodeURIComponent('Vendas')).catch(()=>null),
           gviz(FONTE,'gid=1855087671').catch(()=>null),   // aba Lembrete (MALU_MMF_FB64)
+          gviz(FONTE,'gid=949094104').catch(()=>null),    // aba Vendas da Hire (MMF mentoria Hire)
         ]);
         // Lembrete entra no bucket 'lembrete' (card Lembrete), fora do CPA/investido de ingresso.
         DATA.malu=metaRows(tMalu).concat(tLembrete?lembreteRows(tLembrete):[]); DATA.hire=metaRows(tHire);
@@ -1410,12 +1420,14 @@
         const _usandoSnapshot = !_metrLive;                       // caiu pra cópia embutida?
         DATA.metricas = _metrLive || metricasParse(METRICAS_FALLBACK);  // nunca fica null → gráfico/orgânico não zeram
         DATA.vendas=tVendas?vendaRows(tVendas):[];
+        DATA.vendasHire=tVendasHire?vendaRows(tVendasHire):[];
         // Cost vem em US$ (conta do Meta) → converte p/ R$ pela cotação (aba Metas ou 5,19)
         const cot = DATA.metas.cotacao || 5.19;
         DATA.malu.forEach(r=>{ r.cost *= cot; });
         DATA.hire.forEach(r=>{ r.cost *= cot; });
         // Só o Investimento é US$ (Meta); Faturamento/Valor Carrinho já vêm em R$ (checkout).
         DATA.vendas.forEach(r=>{ r.inv *= cot; });
+        DATA.vendasHire.forEach(r=>{ r.inv *= cot; });
         // Se a MÉTRICAS ao vivo não carregou (privada/401), a dash usa a cópia embutida e avisa (sem alarde).
         // Fica fora do #body (não some ao trocar de aba). Quando a planilha for reaberta, volta pro ao vivo sozinha.
         (function(){ const bd=document.getElementById('body'); let w=document.getElementById('metrWarn');
