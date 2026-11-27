@@ -246,6 +246,7 @@
       <button class="tab" data-p="publicos" onclick="setTab(this)">Públicos</button>
       <button class="tab" data-p="criativos" onclick="setTab(this)">Criativos</button>
       <button class="tab" data-p="vendas" onclick="setTab(this)">Vendas</button>
+      <button class="tab" data-p="whats" onclick="setTab(this)">WhatsApp</button>
       <button class="tab" data-p="lembrete" onclick="setTab(this)">Lembrete</button>
       <button class="tab" data-p="lp" onclick="setTab(this)">LP</button>
       <button class="tab" data-p="pesquisa" onclick="setTab(this)">Pesquisa</button>
@@ -273,7 +274,7 @@
       investimento:132000, cpa:80, cpm:25, ctr:0.80, connect_rate:82,
       cotacao:5.20, data_inicio:'26/10/2026', data_evento:'21 e 22/11' };
 
-    let DATA = { malu:[], hire:[], umalu:[], uhire:[], metas:{...METAS_DEFAULT}, metricas:null, vendas:[], vendasHire:[] };
+    let DATA = { malu:[], hire:[], umalu:[], uhire:[], metas:{...METAS_DEFAULT}, metricas:null, vendas:[], vendasHire:[], whats:[] };
     let profile = 'geral', presetDays = 'all';
 
     const BRL = v => (v==null||isNaN(v)) ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -367,6 +368,18 @@
         out.push({ date:d, campanha:cStr(c[1])||'—', publico:cStr(c[2])||'—', criativo:cStr(c[3])||'—',
           inv:cNum(c[4]), imp:cNum(c[5]), clk:cNum(c[6]), vis:cNum(c[7]), cart:cNum(c[8]),
           valcart:cNum(c[9]), chk:cNum(c[10]), vendas:cNum(c[11]), fat:cNum(c[12]), link:cStr(c[13]) });
+      }
+      return out;
+    }
+    // aba "Vendas WhatsApp" (gid 2000189329) — leads que chamam no WhatsApp pela campanha de recuperação.
+    // Colunas: Data0, Campanha1, Público2, Criativo3, Investimento4, Impressões5, Cliques6, Leads7, Thumb8, Status9, Quantidade10, Vendas11, Dólar12
+    function whatsRows(table){
+      const out=[];
+      for(const r of (table.rows||[])){
+        const c=r.c||[]; const d=cDate(c[0]); if(!d) continue;
+        out.push({ date:d, campanha:cStr(c[1])||'—', publico:cStr(c[2])||'—', criativo:cStr(c[3])||'—',
+          inv:cNum(c[4]), imp:cNum(c[5]), clk:cNum(c[6]), leads:cNum(c[7]), link:cStr(c[8]),
+          status:cStr(c[9]), qtd:cNum(c[10]), vendas:cNum(c[11]) });
       }
       return out;
     }
@@ -1363,34 +1376,46 @@
       upd();
     }
 
-    // ── Aba WHATS: campanhas de mentoria por WhatsApp (já estão na Malu/Hire Meta) ──
+    // ── Aba WHATSAPP: leads que chamam elas no WhatsApp (planilha dedicada, FB75 recuperação) ──
+    // Lê DATA.whats (aba "Vendas WhatsApp", gid 2000189329). Headline = CONVERSAS (coluna Leads).
+    let _whStatus='';                                   // ''=Todos · 'A'=Ativos · 'P'=Pausados
+    function setWhStatus(v){ _whStatus=v; renderWhats(); }
+    const _whAtivo = s => /ACTIVE|ATIVO/i.test(s||'');
     function renderWhats(){
       killCharts();
       const upd=()=>{ const u=document.getElementById('updated'); if(u) u.textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
       const inRangeW = d => (!fStart||d>=fStart) && (!fEnd||d<=fEnd) && d>=cutoff();
-      const rows=DATA.malu.concat(DATA.hire).filter(r=>inRangeW(r.date) && /WHATSAPP/i.test(r.campanha||''));
+      const rows=(DATA.whats||[]).filter(r=>inRangeW(r.date));
       if(!rows.length){ document.getElementById('body').innerHTML='<div class="empty">Sem dados de WhatsApp no período</div>'; upd(); return; }
       const S=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
-      const inv=S('cost'), imp=S('impressions'), reach=S('reach'), clk=S('clicks');
-      const ctr=div(clk,imp)*100, cpm=div(inv,imp)*1000, cpc=div(inv,clk);
+      const inv=S('inv'), imp=S('imp'), clk=S('clk'), leads=S('leads'), vendas=S('vendas');
+      const cpl=div(inv,leads), ctr=div(clk,imp)*100, cpc=div(inv,clk);
       const camps=[...new Set(rows.map(r=>r.campanha))].filter(x=>x&&x!=='—');
-      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA · WHATSAPP${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Mentoria vendida por WhatsApp · investido já em R$ · a venda fecha no Clint (não é rastreada por campanha, por isso sem CPA/ROAS aqui)</div></div><div class="lp-geral-stats">
+      let h=`<div class="lp-geral"><div class="lp-geral-lbl">MENTORIA · WHATSAPP${camps.length?' ('+camps.length+' camp.)':''}<div style="font-size:.62rem;font-weight:600;opacity:.85;margin-top:3px;letter-spacing:.02em">Leads que chamam no WhatsApp pela campanha de recuperação · investido já em R$ · a venda fecha na conversa (não rastreada por campanha, por isso sem CPA/ROAS aqui)</div></div><div class="lp-geral-stats">
         <div><div class="lp-meta-lbl">Investido</div><div class="lp-meta-val">${BRL(inv)}</div></div>
+        <div><div class="lp-meta-lbl">Conversas no WhatsApp</div><div class="lp-meta-val">${NUM(leads)}</div></div>
+        <div><div class="lp-meta-lbl">Custo por conversa</div><div class="lp-meta-val">${leads?BRL(cpl):'—'}</div></div>
         <div><div class="lp-meta-lbl">Impressões</div><div class="lp-meta-val">${NUM(imp)}</div></div>
-        <div><div class="lp-meta-lbl">Alcance</div><div class="lp-meta-val">${NUM(reach)}</div></div>
         <div><div class="lp-meta-lbl">Cliques</div><div class="lp-meta-val">${NUM(clk)}</div></div>
         <div><div class="lp-meta-lbl">CTR</div><div class="lp-meta-val">${PCT(ctr)}</div></div>
-        <div><div class="lp-meta-lbl">CPM</div><div class="lp-meta-val">${BRL(cpm)}</div></div>
       </div></div>`;
-      // Detalhe por criativo
+      // Detalhe por criativo (agrega o período); status = ACTIVE se qualquer dia do criativo estiver ativo
       const by={};
-      for(const r of rows){ const k=r.anuncio||'—'; const o=by[k]||(by[k]={k, camp:r.campanha, link:'', inv:0, imp:0, clk:0}); o.inv+=(r.cost||0); o.imp+=(r.impressions||0); o.clk+=(r.clicks||0); if(!o.link&&r.link)o.link=r.link; }
-      let list=Object.values(by).map(o=>Object.assign(o,{ctr:div(o.clk,o.imp)*100, cpc:div(o.inv,o.clk)})).sort((a,b)=>b.inv-a.inv);
-      h+=`<div class="lbl">Criativos (${list.length})</div><div class="twrap"><table><thead><tr>
-        <th style="text-align:left">Criativo</th><th style="text-align:left">Campanha</th><th>Investido</th><th>Impr.</th><th>CTR</th><th>Cliques</th><th>CPC</th>
+      for(const r of rows){ const k=r.criativo||'—'; const o=by[k]||(by[k]={k, camp:r.campanha, link:'', inv:0, imp:0, clk:0, leads:0, ativo:false});
+        o.inv+=(r.inv||0); o.imp+=(r.imp||0); o.clk+=(r.clk||0); o.leads+=(r.leads||0);
+        if(_whAtivo(r.status)) o.ativo=true; if(!o.link&&r.link)o.link=r.link; }
+      let list=Object.values(by).map(o=>Object.assign(o,{cpl:div(o.inv,o.leads), ctr:div(o.clk,o.imp)*100})).sort((a,b)=>b.leads-a.leads||b.inv-a.inv);
+      const nA=list.filter(o=>o.ativo).length, nP=list.length-nA;
+      if(_whStatus==='A') list=list.filter(o=>o.ativo); else if(_whStatus==='P') list=list.filter(o=>!o.ativo);
+      const fb=(v,lbl)=>`<button class="vgbtn${_whStatus===v?' active':''}" onclick="setWhStatus('${v}')">${lbl}</button>`;
+      h+=`<div class="lbl" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">Criativos (${list.length})
+        <span class="vgsel" style="margin:0">${fb('','Todos ('+(nA+nP)+')')}${fb('A','Ativos ('+nA+')')}${fb('P','Pausados ('+nP+')')}</span></div>
+        <div class="twrap"><table><thead><tr>
+        <th style="text-align:left">Criativo</th><th>Status</th><th>Investido</th><th>Conversas</th><th>Custo/conversa</th><th>Impr.</th><th>Cliques</th><th>CTR</th>
       </tr></thead><tbody>`;
       for(const o of list){
-        h+=`<tr><td title="${o.k}">${o.link?`<a class="vlink" href="${o.link}" target="_blank">${o.k}</a>`:o.k}</td><td title="${o.camp}">${o.camp}</td><td>${BRL(o.inv)}</td><td>${NUM(o.imp)}</td><td>${PCT(o.ctr)}</td><td>${NUM(o.clk)}</td><td>${o.clk?BRL(o.cpc):'—'}</td></tr>`;
+        const stTxt=o.ativo?'<span style="color:#49d17a">Ativo</span>':'<span style="opacity:.6">Pausado</span>';
+        h+=`<tr><td title="${o.k}">${o.link?`<a class="vlink" href="${o.link}" target="_blank">${o.k}</a>`:o.k}</td><td style="text-align:center">${stTxt}</td><td>${BRL(o.inv)}</td><td><b>${NUM(o.leads)}</b></td><td>${o.leads?BRL(o.cpl):'—'}</td><td>${NUM(o.imp)}</td><td>${NUM(o.clk)}</td><td>${PCT(o.ctr)}</td></tr>`;
       }
       h+=`</tbody></table></div>`;
       document.getElementById('body').innerHTML=h;
@@ -1401,7 +1426,7 @@
       document.getElementById('body').innerHTML='<div class="loading">Carregando dados da planilha…</div>';
       try{
         const UTMQ="gid=0&tq="+encodeURIComponent("select * where A >= date '2026-10-23'");
-        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas,tLembrete,tVendasHire]=await Promise.all([
+        const [tMalu,tHire,tMetas,tuMalu,tuHire,tMetr,tVendas,tLembrete,tVendasHire,tWhats]=await Promise.all([
           gviz(FONTE,'sheet='+encodeURIComponent('Malu Meta')),
           gviz(FONTE,'sheet='+encodeURIComponent('Hire Meta')),
           gviz(FONTE,'sheet='+encodeURIComponent('Metas')).catch(()=>null),
@@ -1411,6 +1436,7 @@
           gviz(FONTE,'sheet='+encodeURIComponent('Vendas')).catch(()=>null),
           gviz(FONTE,'gid=1855087671').catch(()=>null),   // aba Lembrete (MALU_MMF_FB64)
           gviz(FONTE,'gid=949094104').catch(()=>null),    // aba Vendas da Hire (MMF mentoria Hire)
+          gviz(FONTE,'gid=2000189329').catch(()=>null),   // aba Vendas WhatsApp (leads que chamam no WhatsApp · FB75 recuperação)
         ]);
         // Lembrete entra no bucket 'lembrete' (card Lembrete), fora do CPA/investido de ingresso.
         DATA.malu=metaRows(tMalu).concat(tLembrete?lembreteRows(tLembrete):[]); DATA.hire=metaRows(tHire);
@@ -1428,6 +1454,8 @@
         // Só o Investimento é US$ (Meta); Faturamento/Valor Carrinho já vêm em R$ (checkout).
         DATA.vendas.forEach(r=>{ r.inv *= cot; });
         DATA.vendasHire.forEach(r=>{ r.inv *= cot; });
+        DATA.whats=tWhats?whatsRows(tWhats):[];
+        DATA.whats.forEach(r=>{ r.inv *= cot; });   // Investimento vem em US$ (conta Malu) → R$
         // Se a MÉTRICAS ao vivo não carregou (privada/401), a dash usa a cópia embutida e avisa (sem alarde).
         // Fica fora do #body (não some ao trocar de aba). Quando a planilha for reaberta, volta pro ao vivo sozinha.
         (function(){ const bd=document.getElementById('body'); let w=document.getElementById('metrWarn');
